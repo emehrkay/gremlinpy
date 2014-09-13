@@ -22,13 +22,13 @@ class Gremlin(object):
     def __getattr__(self, attr):
         attr = Attribute(self, attr)
         
-        return self.add_node(attr)
+        return self.add_token(attr)
     
     def __call__(self, *args):
         func = Function(self, str(self.bottom), list(args))
         self.bottom.next = func
         
-        return self.remove_node(self.bottom).add_node(func)
+        return self.remove_token(self.bottom).add_token(func)
             
     def __getitem__(self, val):
         if type(val) is not slice:
@@ -36,27 +36,27 @@ class Gremlin(object):
             
         index = Index(self, val)
         
-        return self.add_node(index)
+        return self.add_token(index)
         
     def __str__(self):
         return self.__unicode__()
     
     def __unicode__(self):
-        node   = self.top
-        prev   = node
+        token   = self.top
+        prev   = token
         tokens = []
         
-        while node:
-            string = str(node)
-            next   = node.next
+        while token:
+            string = str(token)
+            next   = token.next
 
-            if len(tokens) and node.concat and type(next) is not Raw:
+            if len(tokens) and token.concat and type(next) is not Raw:
                 tokens.append(prev.concat)
 
             tokens.append(string)
 
-            prev = node
-            node = node.next
+            prev = token
+            token = token.next
         
         return ''.join(tokens)
         
@@ -95,7 +95,7 @@ class Gremlin(object):
     def unbound(self, function, *args):
         unbound = UnboudFunction(self, function, args)
         
-        return self.add_node(unbound)
+        return self.add_token(unbound)
 
     def close(self, value, *args):
         if args:
@@ -103,28 +103,28 @@ class Gremlin(object):
         else:
             close = Closure(self, value)
         
-        return self.add_node(close)
+        return self.add_token(close)
         
     def raw(self, value):
         raw = Raw(self, value)
         
-        return self.add_node(raw)
+        return self.add_token(raw)
         
-    def add_node(self, node):
-        self.bottom.next = node
-        self.bottom = node
+    def add_token(self, token):
+        self.bottom.next = token
+        self.bottom = token
         
         return self
         
-    def remove_node(self, remove):
-        node = self.top
+    def remove_token(self, remove):
+        token = self.top
         
-        while node:
-            if node.next == remove:
-                node.next = node.next.next
+        while token:
+            if token.next == remove:
+                token.next = token.next.next
                 break
                 
-            node = node.next
+            token = token.next
         
         return self
         
@@ -139,7 +139,7 @@ class Gremlin(object):
         return self
 
 
-class Node(object):
+class Token(object):
     next = None
     value = None
     args = []
@@ -161,7 +161,7 @@ class Node(object):
         return self.value
 
 
-class GraphVariable(Node):
+class GraphVariable(Token):
     concat = '.'
     
     def __unicode__(self):
@@ -171,11 +171,11 @@ class GraphVariable(Node):
         return self.value
 
 
-class Attribute(Node):
+class Attribute(Token):
     concat = '.'
 
 
-class Function(Node):
+class Function(Token):
     """
     class used to create a Gremlin function
     it assumes that the last argument passed to the function is the only thing 
@@ -191,7 +191,7 @@ class Function(Node):
 
     def __unicode__(self):
         params = {}
-        
+
         if len(self.args):
             bound  = self.args.pop()
             params = self.args
@@ -205,14 +205,14 @@ class Function(Node):
             
         return '%s(%s)' % (self.value, ', '.join(params))
         
-class UnboudFunction(Node):
+class UnboudFunction(Token):
     concat = '.'
     
     def __unicode__(self):
         return '%s(%s)' % (self.value, ', '.join(self.args))
 
 
-class Index(Node):
+class Index(Token):
     def __unicode__(self):
         if self.value.stop is not None:
             index = '[%s..%s]' % (self.value.start, self.value.stop)
@@ -222,7 +222,7 @@ class Index(Node):
         return index
 
 
-class Closure(Node):
+class Closure(Token):
     def __unicode__(self):
         if type(self.value) is Gremlin:
             self.value.set_parent_gremlin(self.gremlin)
@@ -230,7 +230,7 @@ class Closure(Node):
         return '{%s}' % str(self.value)
 
 
-class ClosureArguments(Node):
+class ClosureArguments(Token):
     def __unicode__(self):
         if type(self.value) is Gremlin:
             self.value.set_parent_gremlin(self.gremlin)
@@ -238,7 +238,7 @@ class ClosureArguments(Node):
         return '{%s -> %s}' % (','.join(self.args), str(self.value))
 
 
-class Raw(Node):
+class Raw(Token):
     def __unicode__(self):
         if type(self.value) is Gremlin:
             self.value.set_parent_gremlin(self.gremlin)

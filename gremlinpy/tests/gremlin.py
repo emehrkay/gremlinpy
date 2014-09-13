@@ -1,6 +1,6 @@
 import unittest
 from random import randrange
-from gremlinpy.gremlin import Gremlin
+from gremlinpy.gremlin import Gremlin, Function, UnboudFunction
 
 def get_dict_key(dict, value):
     for k, v in dict.iteritems():
@@ -234,6 +234,33 @@ class GremlinTests(unittest.TestCase):
         self.assertTrue(s == expected)
         self.assertTrue(len(params) == 1)
 
+    def test_can_add_a_reserved_word_as_apart_of_the_query_as_function_with_args(self):
+        g = Gremlin();
+        init = Function(g, '__init__', ['arg'])
+
+        g.add_token(init)
+        
+        s        = str(g)
+        params   = g.bound_params
+        arg      = get_dict_key(params, 'arg')
+        expected = 'g.__init__(%s)' % arg
+        
+        self.assertTrue(s == expected)
+        self.assertTrue(len(params) == 1)
+
+    def test_can_add_a_reserved_word_as_apart_of_the_query_as_function_without_args(self):
+        g = Gremlin();
+        unbound = ['arg', '2']
+        init = UnboudFunction(g, '__init__', unbound)
+
+        g.add_token(init)
+        
+        s        = str(g)
+        params   = g.bound_params
+        expected = 'g.__init__(%s, %s)' % (unbound[0], unbound[1])
+
+        self.assertTrue(s == expected)
+        self.assertTrue(len(params) == 0)
         
 class GremlinInjectionTests(unittest.TestCase):
     def test_can_nest_gremlin(self):
