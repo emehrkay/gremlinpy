@@ -1,9 +1,11 @@
 import uuid
+from gremlinpy.statement import Statement
+from gremlinpy.config import GRAPH_VARIABLE
 
 class Gremlin(object):
     PARAM_PREFIX = 'GPY_PARAM'
     
-    def __init__(self, graph_variable='g'):
+    def __init__(self, graph_variable=GRAPH_VARIABLE):
         self.gv  = graph_variable
         self.top = GraphVariable(self, graph_variable)
         
@@ -42,22 +44,33 @@ class Gremlin(object):
         return self.__unicode__()
     
     def __unicode__(self):
-        token   = self.top
+        token  = self.top
         prev   = token
         tokens = []
         
+        """
+        prepare the gremlin string
+            use the token's concat value only if the preceeding token is not Raw
+            or an empty string (this happens when the graph variable is set to '')
+        """
         while token:
             string = str(token)
             next   = token.next
+            
+            if len(tokens) and token.concat and type(prev) is not Raw:
+                if type(prev) == GraphVariable:
+                    append = len(tokens[-1]) > 0
+                else:
+                    append = True
 
-            if len(tokens) and token.concat and type(next) is not Raw:
-                tokens.append(prev.concat)
+                if append:
+                    tokens.append(token.concat)
 
             tokens.append(string)
 
             prev = token
             token = token.next
-        
+
         return ''.join(tokens)
         
     def set_parent_gremlin(self, gremlin):
@@ -134,7 +147,7 @@ class Gremlin(object):
         return self
         
     def apply_statement(self, statement):
-        statement.gremlin = self
+        statement.set_gremlin(self).build()
 
         return self
 
@@ -143,7 +156,7 @@ class Token(object):
     next = None
     value = None
     args = []
-    concat = None
+    concat = ''
     
     def __init__(self, gremlin, value, args=None):
         self.gremlin = gremlin
@@ -159,11 +172,17 @@ class Token(object):
 
     def __unicode__(self):
         return self.value
+        
+    def apply_statement(self, statement):
+        if hasattr(statement, 'gremlin') == False:
+            statement.set_gremlin(Gremlin())
+
+        statement.gremlin.set_parent_gremlin(self.gremlin)
+        
+        return statement
 
 
 class GraphVariable(Token):
-    concat = '.'
-    
     def __unicode__(self):
         if self.value == '':
             self.concat = ''
@@ -195,21 +214,43 @@ class Function(Token):
         if len(self.args):
             bound  = self.args.pop()
             params = self.args
-            
-            if type(bound) is Gremlin:
+
+            if issubclass(type(bound), Statement):
+                self.apply_statment(bound)
+
+                params.append(str(bound))
+            elif type(bound) is Gremlin:
                 bound.set_parent_gremlin(self.gremlin)
                 
                 params.append(str(bound))
             else:
                 params.append(self.gremlin.bind_param(bound)[0])
-            
+
         return '%s(%s)' % (self.value, ', '.join(params))
-        
+
+
+class FunctionRaw(Function):
+    pass
+
+
 class UnboudFunction(Token):
     concat = '.'
     
     def __unicode__(self):
-        return '%s(%s)' % (self.value, ', '.join(self.args))
+        args = []
+        
+        for arg in self.args:
+            if issubclass(type(arg), Statement):
+                self.apply_statement(arg)
+                args.append(str(arg))
+            else:
+                args.append(arg)
+            
+        return '%s(%s)' % (self.value, ', '.join(args))
+
+
+class UnboudFunctionRaw(UnboudFunction):
+    pass
 
 
 class Index(Token):
@@ -224,7 +265,11 @@ class Index(Token):
 
 class Closure(Token):
     def __unicode__(self):
-        if type(self.value) is Gremlin:
+        if type(self.value) is Statement:
+            self.gremlin.apply_statment(self.value)
+
+            self.value = str(self.gremlin)
+        elif type(self.value) is Gremlin:
             self.value.set_parent_gremlin(self.gremlin)
             
         return '{%s}' % str(self.value)
@@ -232,7 +277,11 @@ class Closure(Token):
 
 class ClosureArguments(Token):
     def __unicode__(self):
-        if type(self.value) is Gremlin:
+        if type(self.value) is Statement:
+            self.gremlin.apply_statment(self.value)
+
+            self.value = str(self.gremlin)
+        elif type(self.value) is Gremlin:
             self.value.set_parent_gremlin(self.gremlin)
             
         return '{%s -> %s}' % (','.join(self.args), str(self.value))
@@ -240,7 +289,12 @@ class ClosureArguments(Token):
 
 class Raw(Token):
     def __unicode__(self):
-        if type(self.value) is Gremlin:
+        if issubclass(type(self.value), Statement):
+            self.apply_statement(self.value)
+
+            self.value = str(self.value)
+        elif type(self.value) is Gremlin:
             self.value.set_parent_gremlin(self.gremlin)
         
         return str(self.value)
+

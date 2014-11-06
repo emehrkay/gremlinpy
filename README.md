@@ -127,7 +127,46 @@ Nesting allows you to have more control over query creation, it offers some sani
 
 
 ##Statements
-Coming soon
+
+Gremlinpy allows you to compose very complex gremlin chains. A Gremlinpy Statement object allows you to encapuslate and package a part of that construction.
+
+Gremlinpy works by tokenizing every action against the object instance into a simple linked list, a statement will allow you apply a preset token definiton to a `Gremlin` instance.
+
+###Usage
+
+Statements can be used in a few ways, the simpliest is to apply it directy to a Gremlin instance:
+
+    class HasMark(Stateemnt):
+        """
+        this statement simply appends .has('name', 'Mark') to a gremlin script
+        """
+        def build(self):
+            g = self.gremlin()
+            
+            g.has("'name'", 'Mark')
+    
+    g = Gremlin()
+    mark = HasMark()
+    g.V.apply_statement(mark)
+    
+    str(g) // g.V.has('name', GP_IOKH_1)
+    
+Statements can also be chained:
+
+    class HasSex(Statement):
+        def __init__(self, sex):
+            self.sex = sex
+            
+        def build(self):
+            self.gremlin.has("'sex'", self.sex)
+            
+    g = Gremlin()
+    mark = HasMark()
+    sex = HasSex('male')
+
+    g.V.apply_statement(mark).apply_statement(sex)
+    
+    str(g) // g.V.has('name', GP_IOKH_1).has('sex', GP_IOKH_2)
 
 ##Performance Tweaks
 ###Always Manually Bind Params

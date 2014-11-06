@@ -161,7 +161,7 @@ class GremlinTests(unittest.TestCase):
         string      = str(g)
         bind, value = g.bound_params.copy().popitem()
         expected    = 'a.function(%s)' % bind
-
+        
         self.assertTrue(string == expected)
         self.assertTrue(len(g.bound_params) == 1)
         
@@ -233,6 +233,61 @@ class GremlinTests(unittest.TestCase):
         
         self.assertTrue(s == expected)
         self.assertTrue(len(params) == 1)
+        
+    def test_can_add_raw_after_function(self):
+        g = Gremlin()
+        r = '--raw-text--'
+        
+        g.func().raw(r)
+        
+        s        = str(g)
+        params   = g.bound_params
+        expected = 'g.func()%s' % r
+        
+        self.assertTrue(s == expected)
+        self.assertTrue(len(params) == 0)
+        
+    def test_can_add_raw_drop_graph_variable(self):
+        g = Gremlin()
+        r = '--raw-text--'
+        
+        g.raw(r).set_graph_variable('')
+        
+        s        = str(g)
+        params   = g.bound_params
+        expected = '%s' % r
+        
+        self.assertTrue(s == expected)
+        self.assertTrue(len(params) == 0)
+        
+    def test_can_add_raw_between_functions(self):
+        g = Gremlin()
+        r = '--raw-text--'
+        a = 'arg'
+        
+        g.func().raw(r).func2(a)
+        
+        s        = str(g)
+        params   = g.bound_params
+        arg      = get_dict_key(params, a)
+        expected = 'g.func()%sfunc2(%s)' % (r, arg)
+        
+        self.assertTrue(s == expected)
+        self.assertTrue(len(params) == 1)
+        
+    def test_can_add_raw_after_closure(self):
+        g = Gremlin()
+        r = '--raw-text--'
+        c = '[[[]]]'
+        
+        g.func().close(c).raw(r)
+        
+        s        = str(g)
+        params   = g.bound_params
+        expected = 'g.func(){%s}%s' % (c, r)
+        
+        self.assertTrue(s == expected)
+        self.assertTrue(len(params) == 0)
 
     def test_can_add_a_reserved_word_as_apart_of_the_query_as_function_with_args(self):
         g = Gremlin();
@@ -248,6 +303,23 @@ class GremlinTests(unittest.TestCase):
         self.assertTrue(s == expected)
         self.assertTrue(len(params) == 1)
 
+    def test_can_add_a_reserved_word_as_apart_of_the_query_as_function_with_args_after_other_calls(self):
+        g = Gremlin();
+        args = ['arg', 'LOOK', 'AT']
+        init = Function(g, '__init__', [args[0]])
+
+        g.look(args[1]).at(args[2]).close('--this--').add_token(init)
+        
+        s        = str(g)
+        params   = g.bound_params
+        arg      = get_dict_key(params, args[0])
+        look     = get_dict_key(params, args[1])
+        at       = get_dict_key(params, args[2])
+        expected = 'g.look(%s).at(%s){--this--}.__init__(%s)' % (look, at, arg)
+
+        self.assertTrue(s == expected)
+        self.assertTrue(len(params) == 3)
+
     def test_can_add_a_reserved_word_as_apart_of_the_query_as_function_without_args(self):
         g = Gremlin();
         unbound = ['arg', '2']
@@ -261,7 +333,23 @@ class GremlinTests(unittest.TestCase):
 
         self.assertTrue(s == expected)
         self.assertTrue(len(params) == 0)
+
+    def test_can_add_a_reserved_word_as_apart_of_the_query_as_function_without_args_after_other_calls(self):
+        g = Gremlin();
+        unbound = ['arg', '2']
+        arg = 'some_arg'
+        init = UnboudFunction(g, '__init__', unbound)
         
+        g.someFunc(arg).add_token(init)
+        
+        s        = str(g)
+        params   = g.bound_params
+        expected = 'g.someFunc(%s).__init__(%s, %s)' % (get_dict_key(params, arg), unbound[0], unbound[1])
+
+        self.assertTrue(s == expected)
+        self.assertTrue(len(params) == 1)
+
+
 class GremlinInjectionTests(unittest.TestCase):
     def test_can_nest_gremlin(self):
         g = Gremlin()

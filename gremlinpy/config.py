@@ -1,0 +1,1 @@
+GRAPH_VARIABLE = 'g'
