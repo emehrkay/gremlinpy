@@ -230,7 +230,7 @@ class Function(Token):
 
 
 class FunctionRaw(Function):
-    pass
+    concat = ''
 
 
 class UnboudFunction(Token):
@@ -250,7 +250,7 @@ class UnboudFunction(Token):
 
 
 class UnboudFunctionRaw(UnboudFunction):
-    pass
+    concat = ''
 
 
 class Index(Token):

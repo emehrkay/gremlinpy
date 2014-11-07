@@ -46,6 +46,8 @@ class Conditional(Statement):
         return self
         
     def build(self):
+        from gremlinpy.gremlin import UnboudFunctionRaw, Raw
+        
         gremlin = self.gremlin
         
         if self.if_condition is None or self.if_body is None:
@@ -54,7 +56,7 @@ class Conditional(Statement):
         #build the if statement
         if_condition = UnboudFunctionRaw(gremlin, 'if', [self.if_condition])
         
-        gremlin.set_graph_variable('').add_token(if_condition).close(self.if_condition)
+        gremlin.set_graph_variable('').add_token(if_condition).close(self.if_body)
         
         #build all of the elif statements
         for i, condition in enumerate(self.elif_condition):
@@ -91,17 +93,3 @@ class GetEdge(Statement):
         
         gremlin.v(out[0]).outE(label[0]).add_token(as_func).inV.unbound('retain', vertex).back(back[0])
 
-
-class ConnectOnce(Statement):
-    def __init__(self, in_v, out_v, label, data=None):
-        self.in_v = in_v
-        self.out_v = out_v
-        self.label = label
-        
-        if data is None:
-            data = {}
-        
-        self.data = data
-        
-    def build(self):
-        pass
