@@ -134,7 +134,7 @@ Gremlinpy works by tokenizing every action against the object instance into a si
 
 ###Usage
 
-Statements can be used in a few ways, the simpliest is to apply it directy to a Gremlin instance:
+Statements can be used in a few ways, the simpliest is to apply it directy to a Gremlin instance. When used this way the statement will augment the Gremlin instance that is directly applied to.
 
     class HasMark(Stateemnt):
         """
@@ -167,6 +167,27 @@ Statements can also be chained:
     g.V.apply_statement(mark).apply_statement(sex)
     
     str(g) // g.V.has('name', GP_IOKH_1).has('sex', GP_IOKH_2)
+    
+A statement can be passed into a Gremlin instance Function, Raw, Closure call. These statements will not modify the Gremlin instance that they are passed into. If you want the statement to have a specialized Gremlin instance, you must pass it into the statement. Otherwise a blank Gremlin instance is created and passed into the Statement.
+
+> Note: do not pass in the outer Gremlin instance to Statements that will be used this way as an infinite loop will be created
+
+    class GetV(Statement):
+        def __init__(self, id):
+            self.id = id
+        
+        def build(self):
+            self.gremlin.v(self.id)
+            
+    g = Gremlin()
+    v = GetV(44)
+    if_con = UnboundFunction(g, 'if', '1 == 1')
+    
+    g.set_graph_variable('').add_token(if_con).close(v)
+    
+    str(g) // if(1 == 1){g.v(GP_DDIO_1)}
+
+
 
 ##Performance Tweaks
 ###Always Manually Bind Params
