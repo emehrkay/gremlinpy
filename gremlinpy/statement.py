@@ -1,5 +1,5 @@
+import config
 from exception import GremlinError, StatementError
-#import gremlin.Function
 
 
 class Statement(object):

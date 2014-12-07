@@ -1,4 +1,4 @@
-
+import config
 
 class GremlinError(Exception):
     pass

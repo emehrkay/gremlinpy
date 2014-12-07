@@ -18,6 +18,7 @@ class Gremlin(object):
         self.bound_param  = str(uuid.uuid4())[-5:]
         self.bound_count  = 0
         self.top.next     = None
+        self.return_var   = None
         
         return self.set_graph_variable(self.gv)
 
@@ -140,7 +141,12 @@ class Gremlin(object):
             token = token.next
         
         return self
+    
+    def set_ret_variable(self, return_variable=None):
+        self.return_variable = return_variable
         
+        return self
+    
     def set_graph_variable(self, graph_variable='g'):
         self.top.value = graph_variable
         
