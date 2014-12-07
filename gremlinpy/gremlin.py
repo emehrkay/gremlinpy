@@ -45,9 +45,13 @@ class Gremlin(object):
         return self.__unicode__()
     
     def __unicode__(self):
-        token  = self.top
-        prev   = token
-        tokens = []
+        token    = self.top
+        prev     = token
+        tokens   = []
+        variable = '' 
+        
+        if self.return_var is not None:
+             variable = '%s = ' % self.return_var
         
         """
         prepare the gremlin string
@@ -72,7 +76,7 @@ class Gremlin(object):
             prev = token
             token = token.next
 
-        return ''.join(tokens)
+        return '%s%s' % (variable, ''.join(tokens))
         
     def set_parent_gremlin(self, gremlin):
         self.parent = gremlin
@@ -142,11 +146,11 @@ class Gremlin(object):
         
         return self
     
-    def set_ret_variable(self, return_variable=None):
-        self.return_variable = return_variable
+    def set_ret_variable(self, return_var=None):
+        self.return_var = return_var
         
         return self
-    
+        
     def set_graph_variable(self, graph_variable='g'):
         self.top.value = graph_variable
         
