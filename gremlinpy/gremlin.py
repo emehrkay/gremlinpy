@@ -120,6 +120,11 @@ class Gremlin(object):
         
         return self.add_token(func_raw)
 
+    def func_raw_unbound(self, function, *args):
+        func_raw = UnboudFunctionRaw(self, function, args)
+        
+        return self.add_token(func_raw)
+
     def close(self, value, *args):
         if args:
             close = ClosureArguments(self, value, args)

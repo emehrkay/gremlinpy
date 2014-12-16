@@ -50,11 +50,17 @@ __GraphVariable__: This is the root token in the list. It is always present and 
     g.v.has("'name'", 'T.eq', 'mark') #g.v.has('name', T.eq, GP_CXZ_1)
     g.bound_params # {'GP_CXG_1': 'mark'}
     
-> Take a closer look at the second example as there are two things going on: the last parameter passed to the has function is automaticaly bound and if you want the value to be quoted in the resulting Gremlin string, you __MUST__ double quote it in Python. 
+> Take a closer look at the second example as there are two things going on: the last parameter passed to the has function is automatically bound and if you want the value to be quoted in the resulting Gremlin string, you __MUST__ double quote it in Python. 
 
-*__UnboundFunction__: This allows you to call a function, but not have the instance automatically bind any of the params. It has a differnt syntax than just chaning a function in the previous exmaple:
+*__UnboundFunction__: This allows you to call a function, but not have the instance automatically bind any of the params. It has a different syntax than just chaning a function in the previous exmaple:
 
     g.unbound('function', 'arg', 1, 3, 5) #g.function(arg, 1, 3, 5)
+    
+*__UnboundFunctionRaw__: This works like `UnboundFunction` except it does not prepend a dot before the function definition. 
+
+    g.set_graph_variable('')
+    g.func_raw_unbound('if', '1 == 2').close('1 is 2?').func_raw_unbound('elseif', '2 == 2').close('2 is 2')
+    // if(1 == 2){1 is 2?}elseif(2 == 2){2 is 2}
 
 *__Index__: Indexes are done in Groovy in a way that is not directly allowed in Python's syntax. However, Python's slices should convert over pretty easily:
 
