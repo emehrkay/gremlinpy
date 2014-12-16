@@ -12,7 +12,7 @@ or
 
 or
 
-    python setup.py install
+    easy_install gemlinpy
 
 ##Dependencies
 None
