@@ -114,6 +114,11 @@ class Gremlin(object):
         unbound = UnboudFunction(self, function, args)
         
         return self.add_token(unbound)
+    
+    def func_raw(self, function, *args):
+        func_raw = FunctionRaw(self, function, args)
+        
+        return self.add_token(func_raw)
 
     def close(self, value, *args):
         if args:
@@ -175,7 +180,7 @@ class Token(object):
         if args is None:
             args = []
 
-        self.args = args
+        self.args = list(args)
         
     def __str__(self):
         return str(self.__unicode__())

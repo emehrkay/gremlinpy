@@ -67,12 +67,48 @@ class GremlinTests(unittest.TestCase):
 
         self.assertTrue(str(g) == expected)
         
+    def test_can_add_return_variable(self):
+        g = Gremlin()
+        v = 'ret_var'
+        
+        g.set_ret_variable(v).function()
+        
+        expected = '%s = g.function()' % v
+        script = str(g)
+        
+        self.assertEquals(expected, script)
+        
+    def test_can_add_and_remove_return_variable(self):
+        g = Gremlin()
+        v = 'ret_var'
+        
+        g.set_ret_variable(v).function().set_ret_variable(None)
+        
+        expected = 'g.function()'
+        script = str(g)
+        
+        self.assertEquals(expected, script)
+        
     def test_can_add_functon(self):
         g = Gremlin().function()
         e = 'g.function()'
         
-        self.assertTrue(str(g) == e)
-        self.assertTrue(len(g.bound_params) == 0)
+        self.assertEquals(str(g), e)
+        self.assertEquals(len(g.bound_params), 0)
+        
+    def test_can_add_unbound_function(self):
+        g = Gremlin().unbound('mark')
+        e = 'g.mark()'
+        
+        self.assertEquals(str(g), e)
+        self.assertEquals(len(g.bound_params), 0)
+        
+    def test_can_add_raw_function(self):
+        g = Gremlin().func_raw('mark')
+        e = 'gmark()'
+        
+        self.assertEquals(str(g), e)
+        self.assertEquals(len(g.bound_params), 0)
         
     def test_can_add_functon_one_arg(self):
         g           = Gremlin().function('arg')
@@ -83,6 +119,24 @@ class GremlinTests(unittest.TestCase):
         self.assertTrue(string == expected)
         self.assertTrue(len(g.bound_params) == 1)
         
+    def test_can_add_unbound_functon_one_arg(self):
+        g        = Gremlin().unbound('function', 'arg')
+        string   = str(g)
+        expected = 'g.function(arg)'
+        
+        self.assertEquals(string, expected)
+        self.assertEquals(len(g.bound_params), 0)
+        
+    def test_can_add_raw_functon_one_arg(self):
+        g        = Gremlin().func_raw('function', 'arg')
+        string   = str(g)
+
+        bind, value = g.bound_params.copy().popitem()
+        expected = 'gfunction(%s)' % bind
+
+        self.assertEquals(string, expected)
+        self.assertEquals(len(g.bound_params), 1)
+        
     def test_can_add_functon_two_args(self):
         g           = Gremlin().function('one', 'two')
         string      = str(g)
@@ -91,6 +145,24 @@ class GremlinTests(unittest.TestCase):
 
         self.assertTrue(string == expected)
         self.assertTrue(len(g.bound_params) == 1)
+    
+    def test_can_add_unbound_functon_two_args(self):
+        g        = Gremlin().unbound('function', 'arg', 'two')
+        string   = str(g)
+        expected = 'g.function(arg, two)'
+        
+        self.assertEquals(string, expected)
+        self.assertEquals(len(g.bound_params), 0)
+        
+    def test_can_add_raw_functon_two_args(self):
+        g        = Gremlin().func_raw('function', 'arg', 'two')
+        string   = str(g)
+
+        bind, value = g.bound_params.copy().popitem()
+        expected = 'gfunction(arg, %s)' % bind
+
+        self.assertEquals(string, expected)
+        self.assertEquals(len(g.bound_params), 1)
         
     def test_can_add_functon_three_args(self):
         g           = Gremlin().function('one', 'two', 'three')
