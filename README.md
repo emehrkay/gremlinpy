@@ -6,8 +6,13 @@ Gremlinpy is a small library that allows you to write pure Python and output Gre
 ##Setup
 
     python setup.py install
-    
+or
+
     pip install gremlinpy
+
+or
+
+    python setup.py install
 
 ##Dependencies
 None
