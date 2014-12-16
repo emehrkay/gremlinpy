@@ -210,7 +210,7 @@ class Attribute(Token):
 
 
 class Function(Token):
-    """
+    """ 
     class used to create a Gremlin function
     it assumes that the last argument passed to the function is the only thing 
     that will be bound

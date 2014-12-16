@@ -144,7 +144,7 @@ class GremlinTests(unittest.TestCase):
         expected    = 'g.function(one, %s)' % bind
 
         self.assertTrue(string == expected)
-        self.assertTrue(len(g.bound_params) == 1)
+        self.assertTrue(len(g.bound_params) == 1) 
     
     def test_can_add_unbound_functon_two_args(self):
         g        = Gremlin().unbound('function', 'arg', 'two')
