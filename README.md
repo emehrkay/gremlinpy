@@ -14,9 +14,6 @@ or
 
     easy_install gemlinpy
 
-##Dependencies
-None
-
 ##Overview
 
 Python's syntax nearly mirrors Groovy's one-to-one so Grelinpy allows for an easy to manipulate Python object that will produce a Gremlin string as a result.
@@ -39,15 +36,15 @@ Once that is converted to a string, your gremlin instance will hold the bound pa
 
 It's that simple, but Gremlinpy allows you to write very complex Gremlin syntax in pure Python. And if you're having trouble expressing the Gremlin/Groovy in the Python model, it allows for straight string manipulation complete with parameter binding.
 
-Though the usage of Python's magic methods, we can compose a Gremlin string by recording every attribute, item, or call against the instance and creating a token for it. There are eight token types that allow you to express Gremlin with Python: 
+Though the usage of Python's magic methods, we can compose a Gremlin string by recording every attribute, item, or call against the instance and creating a token for it. There are ten token types that allow you to express Gremlin with Python: 
 
 __GraphVariable__: This is the root token in the list. It is always present and will be used in every Gremlin string produced. It can be nullified by calling `Gremlin.set_graph_variable('')`. That is useful for when you are running scripts that may not interact with the graph or when your graph variable is something other than the letter "g".
 
-*__Attribute__: Attributes are things on the Gremlin chain that are not functions, arent closures, and are not indexes. They stand alone and are defined when you call any sequence without parenthesis on your Gremlinpy instance. 
+__Attribute__: Attributes are things on the Gremlin chain that are not functions, arent closures, and are not indexes. They stand alone and are defined when you call any sequence without parenthesis on your Gremlinpy instance. 
      
     g.a.b #g.a.b -- a and b are the attribues    
      
-*__Function__: Functions are called when you add parenthesis after an attribute. The function object will assume that the last argument passed to the function is the one that will be bound.
+__Function__: Functions are called when you add parenthesis after an attribute. The function object will assume that the last argument passed to the function is the one that will be bound.
 
     g.V(12) #g.v(GP_UUID_1)
     g.bound_params # {'GP_UUID_1': 12}
@@ -57,31 +54,37 @@ __GraphVariable__: This is the root token in the list. It is always present and 
     
 > Take a closer look at the second example as there are two things going on: the last parameter passed to the has function is automatically bound and if you want the value to be quoted in the resulting Gremlin string, you __MUST__ double quote it in Python. 
 
-*__UnboundFunction__: This allows you to call a function, but not have the instance automatically bind any of the params. It has a different syntax than just chaning a function in the previous exmaple:
+__FunctionRaw__: Works as `Function` but does not prepend the dot before the function name.
+
+    g.set_graph_variable('')
+    g.function('arg')func_raw('some_function', 'raw content')
+    // function(GP_IUNX_1)some_function(raw content)
+
+__UnboundFunction__: This allows you to call a function, but not have the instance automatically bind any of the params. It has a different syntax than just chaning a function in the previous exmaple:
 
     g.unbound('function', 'arg', 1, 3, 5) #g.function(arg, 1, 3, 5)
     
-*__UnboundFunctionRaw__: This works like `UnboundFunction` except it does not prepend a dot before the function definition. 
+__UnboundFunctionRaw__: This works like `UnboundFunction` except it does not prepend a dot before the function definition. 
 
     g.set_graph_variable('')
     g.func_raw_unbound('if', '1 == 2').close('1 is 2?').func_raw_unbound('elseif', '2 == 2').close('2 is 2')
     // if(1 == 2){1 is 2?}elseif(2 == 2){2 is 2}
 
-*__Index__: Indexes are done in Groovy in a way that is not directly allowed in Python's syntax. However, Python's slices should convert over pretty easily:
+__Index__: Indexes are done in Groovy in a way that is not directly allowed in Python's syntax. However, Python's slices should convert over pretty easily:
 
     g.function('arg')[1:50] # g.function(GP_XXX_1)[1..50]
     
     g.x[1] # g.x[1]
 
-*__Closure__: Closures simply allow you to put things between curly braces. Since it is an error to add curly braces to the end of Python objects, this has its own method on the `Gremlin` instance:
+__Closure__: Closures simply allow you to put things between curly braces. Since it is an error to add curly braces to the end of Python objects, this has its own method on the `Gremlin` instance:
 
     g.func.close('im closing this') # g.func{im closing this}
 
-*__ClosureArguments__: Groovy allows for inline lambda functions in a syntax that isn't supported by Python. To define the signature for the closure you simply pass in args after the first argument on a closure:
+__ClosureArguments__: Groovy allows for inline lambda functions in a syntax that isn't supported by Python. To define the signature for the closure you simply pass in args after the first argument on a closure:
 
     g.func.close('body', 'x', 'y') # g.func{x, y -> body }
     
-*__Raw__: Raw allows you to put anything in and have it passed out the same way. It doesnt put anything before or after the call. It is useful for when you're doing something that cannot easily map:
+__Raw__: Raw allows you to put anything in and have it passed out the same way. It doesnt put anything before or after the call. It is useful for when you're doing something that cannot easily map:
 
 	g.set_graph_variable('')
 		.raw('if(').raw('1 == 2').raw(')')
@@ -91,7 +94,6 @@ __GraphVariable__: This is the root token in the list. It is always present and 
 	
 > note: this is just an example, there are better ways to do complex composition
 
-> \* -- these methods have memebers that are reserved words
 
 ###Overloading
 
@@ -117,6 +119,7 @@ If you need the resulting gremlin script to print out '\__init__' or one of the 
     g.add_token(add_token) # g.add_token(5, 6)
     
 ###Binding Params
+
 The last parameter passed in a function is automatically bound. Each `Gremlin` instance creates a unique key to hold the bound parameter values to. However, you can manually bind the param and pass a name that you deisre.
 
     bound = g.bind_param('my_value', 'MY_PARAM')
@@ -201,9 +204,9 @@ A statement can be passed into a Gremlin instance Function, Raw, Closure call. T
     str(g) // if(1 == 1){g.v(GP_DDIO_1)}
 
 
-
 ##Performance Tweaks
 ###Always Manually Bind Params
+
 If your Gremlin server instance has query caching turned on, manually binding params will allow you to create statements on the server that will  pre-parse your query the second time you run it an return results quicker.
 
 If you are not manually binding params, everytime you call a script, even the same script, a differnt one is being sent to the server.
