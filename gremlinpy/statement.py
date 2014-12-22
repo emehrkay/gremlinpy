@@ -75,9 +75,9 @@ class Conditional(Statement):
 
 
 class GetEdge(Statement):
-    def __init__(self, in_v_id, out_v_id, label):
-        self.in_v_id  = in_v_id
+    def __init__(self, out_v_id, in_v_id, label):
         self.out_v_id = out_v_id
+        self.in_v_id  = in_v_id
         self.label    = label
         
     def build(self):
