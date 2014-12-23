@@ -211,10 +211,10 @@ class PackagedStatementTests(unittest.TestCase):
         iid      = get_dict_key(params, in_id)
         label_b  = get_dict_key(params, label)
         as_b     = get_dict_key(params, 'vertex')
-        bound    = (iid, label_b, as_b, oid, as_b)
+        bound    = (oid, label_b, as_b, iid, as_b)
         expected = 'g.v(%s).outE(%s).as(%s).inV.retain([g.v(%s)]).back(%s)' % bound
         
-        self.assertTrue(expected == string)
+        self.assertEquals(expected, string)
         self.assertTrue(len(params) == 4)
         
 
