@@ -80,7 +80,7 @@ class Conditional(Statement):
 
 class GetEdge(Statement):
 
-    def __init__(self, out_v_id, in_v_id, label):
+elf, out_v_id, in_v_id, label):
         self.out_v_id = out_v_id
         self.in_v_id = in_v_id
         self.label = label
