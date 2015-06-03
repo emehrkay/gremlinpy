@@ -1,5 +1,5 @@
-import config
-from exception import GremlinError, StatementError
+import gremlinpy.config
+from gremlinpy.exception import GremlinError, StatementError
 
 
 class Statement(object):

@@ -1,4 +1,4 @@
-import config
+import gremlinpy.config
 
 
 class GremlinError(Exception):
