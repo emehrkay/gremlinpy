@@ -35,9 +35,24 @@ class Gremlin(object):
         return self.remove_token(self.bottom).add_token(func)
 
     def __getitem__(self, val):
-        if type(val) is not slice:
-            val = slice(val, None, None)
+        val = val if type(val) is list or type(val) is tuple else [val]
 
+        try:
+            start = val[0]
+        except Exception as e:
+            start = None
+
+        try:
+            end = val[1]
+        except Exception as e:
+            end = None
+
+        try:
+            step = val[2]
+        except Exception as e:
+            step = None
+
+        val = slice(start, end, step)
         index = Index(self, val)
 
         return self.add_token(index)
