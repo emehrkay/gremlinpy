@@ -127,6 +127,9 @@ class Gremlin(object):
 
         return (name, value)
 
+    def range(self, start, end):
+        return self.func_raw_unbound('range', *(start, end))
+
     def unbound(self, function, *args):
         unbound = UnboudFunction(self, function, args)
 
