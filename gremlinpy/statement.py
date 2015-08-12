@@ -80,21 +80,26 @@ class Conditional(Statement):
 
 class GetEdge(Statement):
 
-    def __init__(self, out_v_id, in_v_id, label):
+    def __init__(self, out_v_id, in_v_id, label, bind_ids=True):
         self.out_v_id = out_v_id
         self.in_v_id = in_v_id
         self.label = label
+        self.bind_ids = bind_ids
 
     def build(self):
         from gremlinpy.gremlin import Function as GF
-
+        
         gremlin = self.gremlin
-        out = gremlin.bind_param(self.out_v_id, 'V_OUT_ID')
+
+        if self.bind_ids:
+            out = gremlin.bind_param(self.out_v_id, 'V_OUT_ID')
+            v_id = gremlin.bind_param(self.in_v_id, 'V_IN_ID')
+        else:
+            out = [self.out_v_id]
+            v_id = [self.in_v_id]
+
         label = gremlin.bind_param(self.label, 'LABEL')
         back = gremlin.bind_param('vertex', 'VERTEX')
-        v_id = gremlin.bind_param(self.in_v_id, 'V_IN_ID')
-        vertex = "[g.v(%s)]" % v_id[0]
-        as_func = GF(gremlin, 'as', [back[0]])
-
-        gremlin.v(out[0]).outE(label[0]).add_token(as_func)
-        gremlin.inV.unbound('retain', vertex).back(back[0])
+        as_var = gremlin.bind_param('AS_LABEL')
+        as_func = GF(gremlin, 'as', [as_var[0]])
+        self.gremlin.V(v_id[0]).bothE(label[0]).add_token(as_func).bothV().has('T.id', out[0]).select(as_var[0])
