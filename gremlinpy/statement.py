@@ -79,12 +79,21 @@ class Conditional(Statement):
 
 
 class GetEdge(Statement):
+    directions = {
+        'both': ('bothE', 'bothV'),
+        'in': ('inE', 'outV'),
+        'out': ('outE', 'inV'),
+    }
 
-    def __init__(self, out_v_id, in_v_id, label, bind_ids=True):
+    def __init__(self, out_v_id, in_v_id, label, direction='both', bind_ids=True):
+        if direction not in self.directions:
+            raise ValueError('The direction must be: ' + ', '.join(self.directions.keys()))
+
         self.out_v_id = out_v_id
         self.in_v_id = in_v_id
         self.label = label
         self.bind_ids = bind_ids
+        self.direction = self.directions[direction]
 
     def build(self):
         from gremlinpy.gremlin import Function as GF
@@ -92,14 +101,27 @@ class GetEdge(Statement):
         gremlin = self.gremlin
 
         if self.bind_ids:
-            out = gremlin.bind_param(self.out_v_id, 'V_OUT_ID')
-            v_id = gremlin.bind_param(self.in_v_id, 'V_IN_ID')
+            out_id = gremlin.bind_param(self.out_v_id, 'V_OUT_ID')
+            in_id = gremlin.bind_param(self.in_v_id, 'V_IN_ID')
         else:
-            out = [self.out_v_id]
-            v_id = [self.in_v_id]
+            out_id = [self.out_v_id]
+            in_id = [self.in_v_id]
+
+        if self.direction[0] == 'outE':
+            first = out_id
+            second = in_id
+        else:
+            first = in_id
+            second = out_id
 
         label = gremlin.bind_param(self.label, 'LABEL')
         back = gremlin.bind_param('vertex', 'VERTEX')
-        as_var = gremlin.bind_param('AS_LABEL')
-        as_func = GF(gremlin, 'as', [as_var[0]])
-        self.gremlin.V(v_id[0]).bothE(label[0]).add_token(as_func).bothV().has('T.id', out[0]).select(as_var[0])
+        
+        gremlin.V(first[0])
+        gremlin.unbound(self.direction[0], '"%s"' % self.label)
+        gremlin.unbound('as', '"as_label"')
+        
+        v_func = GF(gremlin, self.direction[1])
+
+        gremlin.add_token(v_func)
+        gremlin.has('T.id', second[0]).unbound('select', '"as_label"')
