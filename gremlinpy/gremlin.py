@@ -284,9 +284,11 @@ class UnboudFunction(Token):
             if issubclass(type(arg), Statement):
                 self.apply_statement(arg)
                 args.append(str(arg))
+            elif isinstance(arg, (list, tuple)):
+                args += list(arg)
             else:
                 args.append(arg)
-
+        args = map(str, args)
         return '%s(%s)' % (self.value, ', '.join(args))
 
 
