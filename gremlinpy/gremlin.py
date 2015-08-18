@@ -1,9 +1,83 @@
 import uuid
-from gremlinpy.statement import Statement
-from gremlinpy.config import GRAPH_VARIABLE
+
+from .exception import *
+from .statement import Statement
+from .config import GRAPH_VARIABLE
 
 
-class Gremlin(object):
+_PREDICATES = []
+
+
+class LinkList(object):
+    top = None
+    bottom = None
+
+    def add(self, link):
+        self.bottom.next = link
+        self.bottom = link
+
+        return self
+
+    def remove(self, link, drop_after=False):
+        next = None
+        token = self.top
+
+        while token:
+            if link == token:
+                if drop_after:
+                    token.bottom = None
+                    break
+                else:
+                    token.bottom = token.next.next if token.next else None
+
+            token = token.next
+
+        return self
+
+    def can_use(self, prev, link):
+        return True
+
+    def __str__(self):
+        return self.__unicode__()
+
+    def __unicode__(self):
+        token = self.top
+        prev = token
+        tokens = []
+        variable = ''
+
+        """
+        prepare the gremlin string
+            use the token's concat value only if the preceeding token is
+            not Raw or an empty string (this happens when the graph variable
+            is set to ''
+        """
+        while token:
+            string = str(token)
+            next = token.next
+
+            if len(tokens) and token.concat and self.can_use(prev, token):
+                if type(prev) == GraphVariable:
+                    append = len(tokens[-1]) > 0
+                else:
+                    append = True
+
+                if append:
+                    tokens.append(token.concat)
+
+            tokens.append(string)
+
+            prev = token
+            token = token.next
+
+        return '%s%s' % (variable, ''.join(tokens))
+
+
+class Link(object):
+    next = None
+
+
+class Gremlin(LinkList):
     PARAM_PREFIX = 'GPY_PARAM'
 
     def __init__(self, graph_variable=GRAPH_VARIABLE):
@@ -23,13 +97,25 @@ class Gremlin(object):
 
         return self.set_graph_variable(self.gv)
 
+    def can_use(self, prev, link):
+        return type(prev) is not Raw
+
+    def __unicode__(self):
+        string = super(Gremlin, self).__unicode__()
+        variable = ''
+
+        if self.return_var is not None:
+            variable = '%s = ' % self.return_var
+
+        return '%s%s' % (variable, string)
+
     def __getattr__(self, attr):
         attr = Attribute(self, attr)
 
         return self.add_token(attr)
 
     def __call__(self, *args):
-        func = Function(self, str(self.bottom), list(args))
+        func = Function(self, str(self.bottom), tuple(args))
         self.bottom.next = func
 
         return self.remove_token(self.bottom).add_token(func)
@@ -56,44 +142,6 @@ class Gremlin(object):
         index = Index(self, val)
 
         return self.add_token(index)
-
-    def __str__(self):
-        return self.__unicode__()
-
-    def __unicode__(self):
-        token = self.top
-        prev = token
-        tokens = []
-        variable = ''
-
-        if self.return_var is not None:
-            variable = '%s = ' % self.return_var
-
-        """
-        prepare the gremlin string
-            use the token's concat value only if the preceeding token is
-            not Raw or an empty string (this happens when the graph variable
-            is set to ''
-        """
-        while token:
-            string = str(token)
-            next = token.next
-
-            if len(tokens) and token.concat and type(prev) is not Raw:
-                if type(prev) == GraphVariable:
-                    append = len(tokens[-1]) > 0
-                else:
-                    append = True
-
-                if append:
-                    tokens.append(token.concat)
-
-            tokens.append(string)
-
-            prev = token
-            token = token.next
-
-        return '%s%s' % (variable, ''.join(tokens))
 
     def set_parent_gremlin(self, gremlin):
         self.parent = gremlin
@@ -134,6 +182,11 @@ class Gremlin(object):
         unbound = UnboudFunction(self, function, args)
 
         return self.add_token(unbound)
+
+    def fun(self, function, *args):
+        func = Function(self, function, tuple(args))
+        
+        return self.add_token(func)
 
     def func_raw(self, function, *args):
         func_raw = FunctionRaw(self, function, args)
@@ -192,20 +245,7 @@ class Gremlin(object):
         return self
 
 
-class Token(object):
-    next = None
-    value = None
-    args = []
-    concat = ''
-
-    def __init__(self, gremlin, value, args=None):
-        self.gremlin = gremlin
-        self.value = value
-
-        if args is None:
-            args = []
-
-        self.args = list(args)
+class _Tokenable(object):
 
     def __str__(self):
         return str(self.__unicode__())
@@ -220,6 +260,40 @@ class Token(object):
         statement.gremlin.set_parent_gremlin(self.gremlin)
 
         return statement
+
+    def fix_value(self, value):
+        if isinstance(value, Predicate):
+            value.gremlin = Gremlin(self.gremlin.gv)
+            
+        elif isinstance(value, (list, tuple)):
+            value = [str(self.fix_value(a)) for a in value]
+
+            return value if isinstance(value, list) else tuple(value)
+        elif issubclass(type(value), Statement): 
+            self.apply_statment(value)
+            return str(value)
+        elif isinstance(value, Gremlin):
+            value.set_parent_gremlin(self.gremlin)
+
+            return str(value)
+        else:
+            return value
+
+
+class Token(Link, _Tokenable):
+    next = None
+    value = None
+    args = []
+    concat = ''
+
+    def __init__(self, gremlin, value, args=None):
+        self.gremlin = gremlin
+        self.value = self.fix_value(value)
+
+        if args is None:
+            args = ()
+
+        self.args = self.fix_value(tuple(args))
 
 
 class GraphVariable(Token):
@@ -250,7 +324,7 @@ class Function(Token):
     concat = '.'
 
     def __unicode__(self):
-        params = {}
+        params = []
 
         if len(self.args):
             bound = self.args.pop()
@@ -278,18 +352,26 @@ class UnboudFunction(Token):
     concat = '.'
 
     def __unicode__(self):
-        args = []
+        # args = self.fix_value(se)
 
-        for arg in self.args:
-            if issubclass(type(arg), Statement):
-                self.apply_statement(arg)
-                args.append(str(arg))
-            elif isinstance(arg, (list, tuple)):
-                args += list(arg)
-            else:
-                args.append(arg)
-        args = map(str, args)
-        return '%s(%s)' % (self.value, ', '.join(args))
+        # for arg in self.args:
+        #     if issubclass(type(arg), Statement):
+        #         self.apply_statement(arg)
+        #         args.append(str(arg))
+        #     elif isinstance(arg, (list, tuple)):
+        #         args += list(arg)
+        #     elif type(arg) is Gremlin:
+        #         argument = str(arg)
+        #         params = arg.bound_params
+        #
+        #         self.gremlin.bind_params(param)
+        #         args.append(argument)
+        #     else:
+        #         args.append(arg)
+        #
+        # args = map(str, args)
+        print('ARGS', self.args)
+        return '%s(%s)' % (self.value, ', '.join(self.args))
 
 
 class UnboudFunctionRaw(UnboudFunction):
@@ -344,3 +426,81 @@ class Raw(Token):
             self.value.set_parent_gremlin(self.gremlin)
 
         return str(self.value)
+
+
+def _p(name, *args):
+    pred = Predicate(*args)
+    pred._function = name
+
+    return pred
+
+
+class Predicate(_Tokenable, LinkList):
+
+    def __init__(self, *args):
+        self.args = self.fix_value(list(args))
+
+    def __unicode__(self):
+        if not self._function:
+            error = '%s predicate does not have a _function defined' % self.__class__.__name__
+            raise PredicateError(error)
+
+        return '%s(%s)' % (self._function, ', '.join(self.args))
+
+    def __getattr__(self, predicate_name):
+        self.predicate_name = predicate_name
+        return self
+
+    def __call__(self, *args):
+        print('PRED', self.predicate_name, args)
+
+
+class _NamedPredicate(Predicate):
+
+    @property
+    def _function(self):
+        return self.__class__.__name__
+
+
+class eq(_NamedPredicate):
+    pass
+
+
+class neq(_NamedPredicate):
+    pass
+
+
+class lt(_NamedPredicate):
+    pass
+
+
+class lte(_NamedPredicate):
+    pass
+
+
+class gt(_NamedPredicate):
+    pass
+
+
+class gte(_NamedPredicate):
+    pass
+
+
+class inside(_NamedPredicate):
+    pass
+
+
+class outside(_NamedPredicate):
+    pass
+
+
+class between(_NamedPredicate):
+    pass
+
+
+class within(_NamedPredicate):
+    pass
+
+
+class without(_NamedPredicate):
+    pass

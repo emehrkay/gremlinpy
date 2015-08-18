@@ -7,3 +7,11 @@ class GremlinError(Exception):
 
 class StatementError(GremlinError):
     pass
+
+
+class TokenError(GremlinError):
+    pass
+
+
+class PredicateError(GremlinError):
+    pass
