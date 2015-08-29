@@ -183,7 +183,7 @@ class Gremlin(LinkList):
 
         return self.add_token(unbound)
 
-    def fun(self, function, *args):
+    def func(self, function, *args):
         func = Function(self, function, tuple(args))
         
         return self.add_token(func)
@@ -235,6 +235,9 @@ class Gremlin(LinkList):
         return self
 
     def set_graph_variable(self, graph_variable='g'):
+        if not graph_variable:
+            graph_variable = ''
+
         self.top.value = graph_variable
 
         return self
@@ -352,25 +355,6 @@ class UnboudFunction(Token):
     concat = '.'
 
     def __unicode__(self):
-        # args = self.fix_value(se)
-
-        # for arg in self.args:
-        #     if issubclass(type(arg), Statement):
-        #         self.apply_statement(arg)
-        #         args.append(str(arg))
-        #     elif isinstance(arg, (list, tuple)):
-        #         args += list(arg)
-        #     elif type(arg) is Gremlin:
-        #         argument = str(arg)
-        #         params = arg.bound_params
-        #
-        #         self.gremlin.bind_params(param)
-        #         args.append(argument)
-        #     else:
-        #         args.append(arg)
-        #
-        # args = map(str, args)
-        print('ARGS', self.args)
         return '%s(%s)' % (self.value, ', '.join(self.args))
 
 
