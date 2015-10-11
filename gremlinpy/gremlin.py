@@ -5,7 +5,7 @@ from .statement import Statement
 from .config import GRAPH_VARIABLE
 
 
-_PREDICATES = []
+_PREDICATES = {}
 
 
 class LinkList(object):
@@ -115,30 +115,41 @@ class Gremlin(LinkList):
         return self.add_token(attr)
 
     def __call__(self, *args):
-        func = Function(self, str(self.bottom), tuple(args))
+        func_name = str(self.bottom)
+
+        if func_name in _PREDICATES:
+            print('FOUND ', func_name)
+        if len(args) and issubclass(type(args[-1]), Predicate):
+            func = UnboudFunction
+        else:
+            func = Function
+
+        func = func(self, func_name, tuple(args))
         self.bottom.next = func
 
         return self.remove_token(self.bottom).add_token(func)
 
     def __getitem__(self, val):
-        val = val if type(val) is list or type(val) is tuple else [val]
+        #TODO: clean this up
+        if type(val) is not slice:
+            val = val if type(val) is list or type(val) is tuple else [val]
 
-        try:
-            start = val[0]
-        except Exception as e:
-            start = None
+            try:
+                start = val[0]
+            except Exception as e:
+                start = None
 
-        try:
-            end = val[1]
-        except Exception as e:
-            end = None
+            try:
+                end = val[1]
+            except Exception as e:
+                end = None
 
-        try:
-            step = val[2]
-        except Exception as e:
-            step = None
+            try:
+                step = val[2]
+            except Exception as e:
+                step = None
 
-        val = slice(start, end, step)
+            val = slice(start, end, step)
         index = Index(self, val)
 
         return self.add_token(index)
@@ -267,7 +278,9 @@ class _Tokenable(object):
     def fix_value(self, value):
         if isinstance(value, Predicate):
             value.gremlin = Gremlin(self.gremlin.gv)
-            
+            value.set_parent_gremlin(self.gremlin)
+
+            return str(value)
         elif isinstance(value, (list, tuple)):
             value = [str(self.fix_value(a)) for a in value]
 
@@ -412,79 +425,79 @@ class Raw(Token):
         return str(self.value)
 
 
-def _p(name, *args):
-    pred = Predicate(*args)
-    pred._function = name
+class _MetaPredicate(type):
 
-    return pred
+    def __new__(cls, name, bases, attrs):
+        cls = super(_MetaPredicate, cls).__new__(cls, name, bases, attrs)
+        _PREDICATES[name] = cls
+
+        return cls
 
 
-class Predicate(_Tokenable, LinkList):
+class Predicate(Gremlin, metaclass=_MetaPredicate):
 
     def __init__(self, *args):
-        self.args = self.fix_value(list(args))
-
-    def __unicode__(self):
-        if not self._function:
-            error = '%s predicate does not have a _function defined' % self.__class__.__name__
-            raise PredicateError(error)
-
-        return '%s(%s)' % (self._function, ', '.join(self.args))
-
-    def __getattr__(self, predicate_name):
-        self.predicate_name = predicate_name
-        return self
-
-    def __call__(self, *args):
-        print('PRED', self.predicate_name, args)
-
-
-class _NamedPredicate(Predicate):
+        super(Predicate, self).__init__(None)
+        self.args = args
+        getattr(self, self._function)(*args)
 
     @property
     def _function(self):
-        return self.__class__.__name__
+        print('PRED NAME', str(self.__class__.__name__).lower())
+        return str(self.__class__.__name__).lower()
 
 
-class eq(_NamedPredicate):
+class p(Predicate):
     pass
 
 
-class neq(_NamedPredicate):
+class pp(Predicate):
     pass
 
 
-class lt(_NamedPredicate):
+class IS(Predicate):
     pass
 
 
-class lte(_NamedPredicate):
+class eq(Predicate):
     pass
 
 
-class gt(_NamedPredicate):
+class neq(Predicate):
     pass
 
 
-class gte(_NamedPredicate):
+class lt(Predicate):
     pass
 
 
-class inside(_NamedPredicate):
+class lte(Predicate):
     pass
 
 
-class outside(_NamedPredicate):
+class gt(Predicate):
     pass
 
 
-class between(_NamedPredicate):
+class gte(Predicate):
     pass
 
 
-class within(_NamedPredicate):
+class inside(Predicate):
     pass
 
 
-class without(_NamedPredicate):
+class outside(Predicate):
+    pass
+
+
+class between(Predicate):
+    pass
+
+
+class within(Predicate):
+    pass
+
+
+class without(Predicate):
     pass
