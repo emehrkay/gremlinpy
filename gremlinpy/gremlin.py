@@ -117,8 +117,6 @@ class Gremlin(LinkList):
     def __call__(self, *args):
         func_name = str(self.bottom)
 
-        # if func_name in _PREDICATES:
-        #     print('FOUND ', func_name)
         if len(args) and issubclass(type(args[-1]), Predicate):
             func = UnboudFunction
         else:
