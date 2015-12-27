@@ -177,19 +177,19 @@ class GremlinTests(unittest.TestCase):
         self.assertTrue(len(g.bound_params) == 1)
 
     def test_can_add_functon_manually_bind_one_arg(self):
-        g     = Gremlin()
+        g = Gremlin()
         bound = g.bind_param('arg')
 
         g.function(bound[0])
 
-        string      = str(g)
+        string = str(g)
         bind, value = g.bound_params.copy().popitem()
-        expected    = 'g.function(%s)' % bind
+        expected = 'g.function(%s)' % bind
 
-        self.assertTrue(string == expected)
-        self.assertTrue(bind == bound[0])
-        self.assertTrue(value == bound[1])
-        self.assertTrue(len(g.bound_params) == 1)
+        self.assertEqual(string, expected)
+        self.assertEqual(bind, bound[0])
+        self.assertEqual(value, bound[1])
+        self.assertEqual(len(g.bound_params), 1)
 
     def test_can_add_functon_manually_bind_two_args(self):
         g      = Gremlin()
@@ -255,13 +255,13 @@ class GremlinTests(unittest.TestCase):
 
         g.unbound('function', 'val1', 'val2').isbound('hello')
 
-        s        = str(g)
-        params   = g.bound_params
-        hello    = get_dict_key(params, 'hello')
+        s = str(g)
+        params = g.bound_params
+        hello = get_dict_key(params, 'hello')
         expected = 'g.function(val1, val2).isbound(%s)' % hello
 
-        self.assertTrue(str(g) == expected)
-        self.assertTrue(len(g.bound_params) == 1)
+        self.assertEqual(s, expected)
+        self.assertEqual(len(g.bound_params), 1)
 
     def test_can_add_function_with_closure(self):
         g = Gremlin()

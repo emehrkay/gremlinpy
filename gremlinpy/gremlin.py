@@ -172,10 +172,8 @@ class Gremlin(LinkList):
         self.bound_count += 1
 
         if value in self.bound_params:
-            for key, val in self.bound_params.items():
-                if val == value:
-                    name = key
-                    break
+            name = value
+            value = self.bound_params[value]
 
         if name is None:
             name = '{}_{}_{}'.format(self.PARAM_PREFIX, self.bound_param, \
