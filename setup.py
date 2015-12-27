@@ -9,15 +9,15 @@ from setuptools import setup, find_packages
 from gremlinpy import __version__
 
 setup(
-    name             = 'gremlinpy',
-    packages         = find_packages(),
-    version          = __version__,
-    description      = 'Python GAL for Gremlin/Groovy syntax',
-    url              = 'https://github.com/emehrkay/gremlinpy',
-    author           = 'Mark Henderson',
-    author_email     = 'emehrkay@gmail.com',
+    name = 'gremlinpy',
+    packages = find_packages(),
+    version = __version__,
+    description = 'Python GAL for Gremlin/Groovy syntax',
+    url = 'https://github.com/emehrkay/gremlinpy',
+    author = 'Mark Henderson',
+    author_email = 'emehrkay@gmail.com',
     long_description = __doc__,
-    classifiers      = [
+    classifiers = [
         'License :: OSI Approved :: MIT License',
         'Development Status :: 3 - Alpha',
         'Programming Language :: Python :: 2.7',

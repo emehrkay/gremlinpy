@@ -1,4 +1,4 @@
-__version__ = '0.3.0'
+__version__ = '3.0.0'
 
 from .gremlin import *
 from .config import *
