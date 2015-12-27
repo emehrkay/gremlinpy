@@ -1,6 +1,8 @@
 import unittest
-from random import randrange
+from random import randrange, random
+
 from gremlinpy.gremlin import *
+
 
 def get_dict_key(dict, value):
     for k, v in dict.items():
@@ -8,6 +10,7 @@ def get_dict_key(dict, value):
             return k
 
     return None
+
 
 class GremlinTests(unittest.TestCase):
     def test_gremlin_instance(self):
@@ -423,6 +426,7 @@ class GremlinTests(unittest.TestCase):
 
 
 class GremlinInjectionTests(unittest.TestCase):
+
     def test_can_nest_gremlin(self):
         g = Gremlin()
         n = Gremlin()
@@ -433,8 +437,8 @@ class GremlinInjectionTests(unittest.TestCase):
         string   = str(g)
         params   = g.bound_params
 
-        self.assertTrue(expected == string)
-        self.assertTrue(len(params) == 0)
+        self.assertEqual(expected, string)
+        self.assertEqual(len(params), 0)
 
     def test_can_nest_double_nest_gremlin(self):
         g = Gremlin()
@@ -459,10 +463,10 @@ class GremlinInjectionTests(unittest.TestCase):
         n.set_graph_variable('').setSubProp('prop', p['prop'])
         g.function('name', d['name']).nest(n)
 
-        string   = str(g)
-        params   = g.bound_params
-        name     = get_dict_key(params, 'parent')
-        child    = get_dict_key(params, 'child')
+        string = str(g)
+        params = g.bound_params
+        name = get_dict_key(params, 'parent')
+        child = get_dict_key(params, 'child')
         expected = 'g.function(name, %s).nest(setSubProp(prop, %s))' % (name, child)
 
         self.assertTrue(expected == string)
@@ -472,17 +476,45 @@ class GremlinInjectionTests(unittest.TestCase):
 class PredicateTests(unittest.TestCase):
 
     def test_can_pass_single_predicate_to_function(self):
+        arg = str(random())
         g = Gremlin()
-        g.function(lt(12).out(), lt().IS(neq(555)))
+        g.function(lt(arg).out())
 
         string = str(g)
         params = g.bound_params
-        twelve = get_dict_key(params, 12)
-        expected = 'g.function(lt(%s))' % (twelve)
+        argument = get_dict_key(params, arg)
+        expected = 'g.function(lt(%s).out())' % (argument)
 
-        print(string)
-        print(expected)
-        print(params)
+        self.assertEqual(expected, string)
+
+    def test_can_pass_two_predicates_to_function(self):
+        arg = str(random())
+        arg2 = '222_' + str(random())
+        g = Gremlin()
+        g.function(lt(arg).out(), lt(arg2))
+
+        string = str(g)
+        params = g.bound_params
+        argument = get_dict_key(params, arg)
+        argument2 = get_dict_key(params, arg2)
+        expected = 'g.function(lt(%s).out(), lt(%s))' % (argument, argument2)
+
+        self.assertEqual(expected, string)
+
+    def test_can_nest_predicates(self):
+        arg = str(random())
+        arg2 = '222_' + str(random())
+        g = Gremlin()
+        g.function(lt(arg).out(lt(arg2)))
+
+        string = str(g)
+        params = g.bound_params
+        argument = get_dict_key(params, arg)
+        argument2 = get_dict_key(params, arg2)
+        expected = 'g.function(lt(%s).out(lt(%s)))' % (argument, argument2)
+
+        self.assertEqual(expected, string)
+        
 
 
 if __name__ == '__main__':

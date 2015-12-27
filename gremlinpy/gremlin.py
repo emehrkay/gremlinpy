@@ -70,7 +70,7 @@ class LinkList(object):
             prev = token
             token = token.next
 
-        return '%s%s' % (variable, ''.join(tokens))
+        return '{}{}'.format(variable, ''.join(tokens))
 
 
 class Link(object):
@@ -105,9 +105,9 @@ class Gremlin(LinkList):
         variable = ''
 
         if self.return_var is not None:
-            variable = '%s = ' % self.return_var
+            variable = '{} = '.format(self.return_var)
 
-        return '%s%s' % (variable, string)
+        return '{}{}'.format(variable, string)
 
     def __getattr__(self, attr):
         attr = Attribute(self, attr)
@@ -117,8 +117,8 @@ class Gremlin(LinkList):
     def __call__(self, *args):
         func_name = str(self.bottom)
 
-        if func_name in _PREDICATES:
-            print('FOUND ', func_name)
+        # if func_name in _PREDICATES:
+        #     print('FOUND ', func_name)
         if len(args) and issubclass(type(args[-1]), Predicate):
             func = UnboudFunction
         else:
@@ -172,11 +172,13 @@ class Gremlin(LinkList):
         self.bound_count += 1
 
         if value in self.bound_params:
-            name = value
-            value = self.bound_params[value]
+            for key, val in self.bound_params.items():
+                if val == value:
+                    name = key
+                    break
 
         if name is None:
-            name = '%s_%s_%s' % (self.PARAM_PREFIX, self.bound_param, \
+            name = '{}_{}_{}'.format(self.PARAM_PREFIX, self.bound_param, \
                 self.bound_count)
 
         self.bound_params[name] = value
@@ -196,7 +198,7 @@ class Gremlin(LinkList):
 
     def func(self, function, *args):
         func = Function(self, function, tuple(args))
-        
+
         return self.add_token(func)
 
     def func_raw(self, function, *args):
@@ -276,16 +278,18 @@ class _Tokenable(object):
         return statement
 
     def fix_value(self, value):
-        if isinstance(value, Predicate):
+        if isinstance(value, Token):
+            return value
+        elif isinstance(value, Predicate):
             value.gremlin = Gremlin(self.gremlin.gv)
             value.set_parent_gremlin(self.gremlin)
 
             return str(value)
         elif isinstance(value, (list, tuple)):
-            value = [str(self.fix_value(a)) for a in value]
+            value = [self.fix_value(a) for a in value]
 
             return value if isinstance(value, list) else tuple(value)
-        elif issubclass(type(value), Statement): 
+        elif issubclass(type(value), Statement):
             self.apply_statment(value)
             return str(value)
         elif isinstance(value, Gremlin):
@@ -307,9 +311,10 @@ class Token(Link, _Tokenable):
         self.value = self.fix_value(value)
 
         if args is None:
-            args = ()
+            args = []
 
-        self.args = self.fix_value(tuple(args))
+        # self.args = [self.fix_value(a) for a in args]
+        self.args = list(args)
 
 
 class GraphVariable(Token):
@@ -357,7 +362,7 @@ class Function(Token):
             else:
                 params.append(self.gremlin.bind_param(bound)[0])
 
-        return '%s(%s)' % (self.value, ', '.join(params))
+        return '{}({})'.format(self.value, ', '.join(params))
 
 
 class FunctionRaw(Function):
@@ -368,7 +373,9 @@ class UnboudFunction(Token):
     concat = '.'
 
     def __unicode__(self):
-        return '%s(%s)' % (self.value, ', '.join(self.args))
+        args = [self.fix_value(a) for a in self.args]
+
+        return '{}({})'.format(self.value, ', '.join(args))
 
 
 class UnboudFunctionRaw(UnboudFunction):
@@ -379,9 +386,9 @@ class Index(Token):
 
     def __unicode__(self):
         if self.value.stop is not None:
-            index = '[%s..%s]' % (self.value.start, self.value.stop)
+            index = '[{}..{}]'.format(self.value.start, self.value.stop)
         else:
-            index = '[%s]' % self.value.start
+            index = '[{}]'.format(self.value.start)
 
         return index
 
@@ -409,7 +416,7 @@ class ClosureArguments(Token):
         elif type(self.value) is Gremlin:
             self.value.set_parent_gremlin(self.gremlin)
 
-        return '{%s -> %s}' % (','.join(self.args), str(self.value))
+        return '{{} -> {}}'.format(','.join(self.args), str(self.value))
 
 
 class Raw(Token):
@@ -442,9 +449,12 @@ class Predicate(Gremlin, metaclass=_MetaPredicate):
         getattr(self, self._function)(*args)
 
     @property
-    def _function(self):
-        print('PRED NAME', str(self.__class__.__name__).lower())
+    def _function(self, *args):
         return str(self.__class__.__name__).lower()
+
+
+class __(Predicate):
+    pass
 
 
 class p(Predicate):
@@ -501,3 +511,6 @@ class within(Predicate):
 
 class without(Predicate):
     pass
+
+
+_ = Predicate()
