@@ -85,9 +85,12 @@ class GetEdge(Statement):
         'out': ('outE', 'inV'),
     }
 
-    def __init__(self, out_v_id, in_v_id, label, direction='both', bind_ids=True):
+    def __init__(self, out_v_id, in_v_id, label, direction='both', \
+                 bind_ids=True):
         if direction not in self.directions:
-            raise ValueError('The direction must be: ' + ', '.join(self.directions.keys()))
+            error = 'The direction must be: ' + \
+                ', '.join(self.directions.keys())
+            raise ValueError(error)
 
         self.out_v_id = out_v_id
         self.in_v_id = in_v_id
@@ -97,7 +100,7 @@ class GetEdge(Statement):
 
     def build(self):
         from gremlinpy.gremlin import Function as GF
-        
+
         gremlin = self.gremlin
 
         if self.bind_ids:
@@ -116,11 +119,11 @@ class GetEdge(Statement):
 
         label = gremlin.bind_param(self.label, 'LABEL')
         back = gremlin.bind_param('vertex', 'VERTEX')
-        
+
         gremlin.V(first[0])
         gremlin.unbound(self.direction[0], '"%s"' % self.label)
         gremlin.unbound('as', '"as_label"')
-        
+
         v_func = GF(gremlin, self.direction[1])
 
         gremlin.add_token(v_func)

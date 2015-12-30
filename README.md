@@ -130,6 +130,14 @@ The last parameter passed in a function is automatically bound. Each `Gremlin` i
     g.v(bound[0]) # g.v(MY_PARAM)
     g.bound_params # {'MY_PARAM': 'my_value'}
 
+gremlinpy will attempt to reuse binding names in the generated script. If you prevously bound 'mark is great' and bind it again, the script will utilitize the same parameters for each instance. This will save on the overally payload that is sent to the Gremlin server and it will save on what the Gremlin server has to cache.
+
+~~~python
+
+bound = g.bind_param('some value', 'SOME\_KEY')
+g.function(bound[0]).func2(bound[0]) # g.function(SOME\_KEY).func2(SOME_KEY)
+~~~
+
 ###Nesting Instances
 
 Gremlinpy gets interesting when you want to compose a very complex string. It will allow you to nest `Gremlin` instances passing any bound params up to the root instance. 

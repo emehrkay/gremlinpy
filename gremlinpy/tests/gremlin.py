@@ -123,6 +123,19 @@ class GremlinTests(unittest.TestCase):
         self.assertEqual(string, expected)
         self.assertEqual(len(g.bound_params), 1)
 
+    def test_can_add_fuctions_binding_same_value_with_one_bound_param(self):
+        val = 'random' + str(random())
+        g = Gremlin()
+        g.func1(val).func2(val)
+        s = str(g)
+        params = g.bound_params
+        one = get_dict_key(params, val)
+        two = get_dict_key(params, val)
+        expected = 'g.func1({}).func2({})'.format(one, two)
+
+        self.assertEqual(1, len(params))
+        self.assertEqual(expected, s)
+
     def test_can_add_unbound_functon_one_arg(self):
         g = Gremlin().unbound('function', 'arg')
         string = str(g)

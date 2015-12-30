@@ -173,6 +173,12 @@ class Gremlin(LinkList):
             name = value
             value = self.bound_params[value]
 
+        if not name and value in self.bound_params.values():
+            for n, v in self.bound_params.items():
+                if v == value:
+                    name = n
+                    break
+
         if name is None:
             name = '{}_{}_{}'.format(self.PARAM_PREFIX, self.bound_param, \
                 self.bound_count)
@@ -506,6 +512,10 @@ class within(Predicate):
 
 
 class without(Predicate):
+    pass
+
+
+class select(Predicate):
     pass
 
 
