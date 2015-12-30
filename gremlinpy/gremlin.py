@@ -1,4 +1,5 @@
 import uuid
+import copy
 
 from .exception import *
 from .statement import Statement
@@ -97,6 +98,16 @@ class Gremlin(LinkList):
 
         return self.set_graph_variable(self.gv)
 
+    @property
+    def stack_bound_params(self):
+        parent = self.parent
+        params = copy.deepcopy(self.bound_params)
+
+        while parent:
+            params.update(parent.stack_bound_params)
+
+        return params
+
     def can_use(self, prev, link):
         return type(prev) is not Raw
 
@@ -172,8 +183,7 @@ class Gremlin(LinkList):
         if value in self.bound_params:
             name = value
             value = self.bound_params[value]
-
-        if not name and value in self.bound_params.values():
+        elif value in self.stack_bound_params.values():
             for n, v in self.bound_params.items():
                 if v == value:
                     name = n
