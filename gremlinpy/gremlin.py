@@ -105,6 +105,7 @@ class Gremlin(LinkList):
 
         while parent:
             params.update(parent.stack_bound_params)
+            parent = parent.parent
 
         return params
 

@@ -1,5 +1,5 @@
-import unittest
 from random import randrange, random
+import unittest
 
 from gremlinpy.gremlin import *
 
