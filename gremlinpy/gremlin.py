@@ -303,7 +303,7 @@ class _Tokenable(object):
 
             return value if isinstance(value, list) else tuple(value)
         elif issubclass(type(value), Statement):
-            self.apply_statment(value)
+            self.apply_statement(value)
             return str(value)
         elif isinstance(value, Gremlin):
             value.set_parent_gremlin(self.gremlin)

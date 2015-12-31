@@ -84,47 +84,33 @@ class GetEdge(Statement):
         'in': ('inE', 'outV'),
         'out': ('outE', 'inV'),
     }
+    directions = ['both', 'in', 'out']
 
     def __init__(self, out_v_id, in_v_id, label, direction='both', \
                  bind_ids=True):
         if direction not in self.directions:
             error = 'The direction must be: ' + \
-                ', '.join(self.directions.keys())
+                ', '.join(self.directions)
             raise ValueError(error)
 
         self.out_v_id = out_v_id
         self.in_v_id = in_v_id
         self.label = label
         self.bind_ids = bind_ids
-        self.direction = self.directions[direction]
+        self.direction = direction
 
     def build(self):
-        from gremlinpy.gremlin import Function as GF
-
-        gremlin = self.gremlin
-
         if self.bind_ids:
-            out_id = gremlin.bind_param(self.out_v_id, 'V_OUT_ID')
-            in_id = gremlin.bind_param(self.in_v_id, 'V_IN_ID')
+            out_id = self.gremlin.bind_param(self.out_v_id, 'V_OUT_ID')
+            in_id = self.gremlin.bind_param(self.in_v_id, 'V_IN_ID')
         else:
             out_id = [self.out_v_id]
             in_id = [self.in_v_id]
 
-        if self.direction[0] == 'outE':
-            first = out_id
-            second = in_id
-        else:
-            first = in_id
-            second = out_id
+        label = self.gremlin.bind_param(self.label, 'LABEL')
+        back = self.gremlin.bind_param('vertex', 'VERTEX')
 
-        label = gremlin.bind_param(self.label, 'LABEL')
-        back = gremlin.bind_param('vertex', 'VERTEX')
-
-        gremlin.V(first[0])
-        gremlin.unbound(self.direction[0], '"%s"' % self.label)
-        gremlin.unbound('as', '"as_label"')
-
-        v_func = GF(gremlin, self.direction[1])
-
-        gremlin.add_token(v_func)
-        gremlin.has('T.id', second[0]).unbound('select', '"as_label"')
+        self.gremlin.V(out_id[0])
+        getattr(self.gremlin, self.direction)(label[0])
+        self.gremlin.func('as', back[0])
+        self.gremlin.hasId(in_id[0]).select(back[0])
