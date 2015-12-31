@@ -1,3 +1,8 @@
+## 3.1.2
+
+Fixed:
+* Get edge built-in statement
+
 ## 3.1.1
 
 Fixed:

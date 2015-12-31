@@ -80,24 +80,22 @@ class Conditional(Statement):
 
 class GetEdge(Statement):
     directions = {
-        'both': ('bothE', 'bothV'),
-        'in': ('inE', 'outV'),
-        'out': ('outE', 'inV'),
-    }
-    directions = ['both', 'in', 'out']
+        'both': 'bothE',
+        'in': 'inE',
+        'out': 'outE'}
 
     def __init__(self, out_v_id, in_v_id, label, direction='both', \
                  bind_ids=True):
         if direction not in self.directions:
             error = 'The direction must be: ' + \
-                ', '.join(self.directions)
+                ', '.join(self.directions.keys())
             raise ValueError(error)
 
         self.out_v_id = out_v_id
         self.in_v_id = in_v_id
         self.label = label
         self.bind_ids = bind_ids
-        self.direction = direction
+        self.direction = self.directions[direction]
 
     def build(self):
         if self.bind_ids:
@@ -112,5 +110,5 @@ class GetEdge(Statement):
 
         self.gremlin.V(out_id[0])
         getattr(self.gremlin, self.direction)(label[0])
-        self.gremlin.func('as', back[0])
+        self.gremlin.func('as', back[0]).inV()
         self.gremlin.hasId(in_id[0]).select(back[0])
