@@ -380,7 +380,7 @@ class GremlinTests(unittest.TestCase):
 
     def test_can_add_a_reserved_word_as_apart_of_the_query_as_function_with_args(self):
         g = Gremlin();
-        init = Function(g, '__init__', ['arg'])
+        init = Function(g, '__init__', 'arg')
 
         g.add_token(init)
 
@@ -395,7 +395,7 @@ class GremlinTests(unittest.TestCase):
     def test_can_add_a_reserved_word_as_apart_of_the_query_as_function_with_args_after_other_calls(self):
         g = Gremlin();
         args = ['arg', 'LOOK', 'AT']
-        init = Function(g, '__init__', [args[0]])
+        init = Function(g, '__init__', args[0])
 
         g.look(args[1]).at(args[2]).close('--this--').add_token(init)
 
@@ -412,7 +412,7 @@ class GremlinTests(unittest.TestCase):
     def test_can_add_a_reserved_word_as_apart_of_the_query_as_function_without_args(self):
         g = Gremlin();
         unbound = ['arg', '2']
-        init = UnboudFunction(g, '__init__', unbound)
+        init = UnboudFunction(g, '__init__', *unbound)
 
         g.add_token(init)
 
@@ -427,7 +427,7 @@ class GremlinTests(unittest.TestCase):
         g = Gremlin();
         unbound = ['arg', '2']
         arg = 'some_arg'
-        init = UnboudFunction(g, '__init__', unbound)
+        init = UnboudFunction(g, '__init__', *unbound)
 
         g.someFunc(arg).add_token(init)
 
@@ -495,9 +495,7 @@ class PredicateTests(unittest.TestCase):
         g.function(lt(arg).out())
 
         string = str(g)
-        params = g.bound_params
-        argument = get_dict_key(params, arg)
-        expected = 'g.function(lt(%s).out())' % (argument)
+        expected = 'g.function(lt(%s).out())' % (arg)
 
         self.assertEqual(expected, string)
 
@@ -508,10 +506,7 @@ class PredicateTests(unittest.TestCase):
         g.function(lt(arg).out(), lt(arg2))
 
         string = str(g)
-        params = g.bound_params
-        argument = get_dict_key(params, arg)
-        argument2 = get_dict_key(params, arg2)
-        expected = 'g.function(lt(%s).out(), lt(%s))' % (argument, argument2)
+        expected = 'g.function(lt(%s).out(), lt(%s))' % (arg, arg2)
 
         self.assertEqual(expected, string)
 
@@ -522,10 +517,7 @@ class PredicateTests(unittest.TestCase):
         g.function(lt(arg).out(lt(arg2)))
 
         string = str(g)
-        params = g.bound_params
-        argument = get_dict_key(params, arg)
-        argument2 = get_dict_key(params, arg2)
-        expected = 'g.function(lt(%s).out(lt(%s)))' % (argument, argument2)
+        expected = 'g.function(lt(%s).out(lt(%s)))' % (arg, arg2)
 
         self.assertEqual(expected, string)
 

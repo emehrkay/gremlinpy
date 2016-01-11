@@ -181,8 +181,10 @@ class PackagedStatementTests(unittest.TestCase):
 
         string = str(g)
         params = g.bound_params
-        expected = 'if(%s){%s}elseif(%s){%s}else{%s}' % (cond, \
-            body, else_i, else_b, else_c)
+        expected = 'if(%s){%s}elseif(%s){%s}else{%s}' % (cond,
+                                                         body,
+                                                         else_i,
+                                                         else_b, else_c)
 
         self.assertTrue(string == expected)
         self.assertTrue(len(params) == 0)
@@ -206,8 +208,8 @@ class PackagedStatementTests(unittest.TestCase):
 
         string = str(g)
         params = g.bound_params
-        expected = 'if(%s){%s}elseif(%s){%s}elseif(%s){%s}else{%s}' % (cond, \
-            body, else_i, else_b, else_i2, else_b2, else_c)
+        exp = (cond, body, else_i, else_b, else_i2, else_b2, else_c)
+        expected = 'if(%s){%s}elseif(%s){%s}elseif(%s){%s}else{%s}' % exp
 
         self.assertTrue(string == expected)
         self.assertTrue(len(params) == 0)
@@ -227,8 +229,8 @@ class PackagedStatementTests(unittest.TestCase):
         iid = get_dict_key(params, in_id)
         label_b = get_dict_key(params, label)
         as_b = get_dict_key(params, 'vertex')
-        bound = (oid, label_b, as_b, iid, as_b)
-        expected = 'g.V(%s).bothE(%s).as(%s).inV().hasId(%s).select(%s)' % \
+        bound = (oid, label_b, iid)
+        expected = "g.V(%s).bothE(%s).as('vertex').inV().hasId(%s).select('vertex')" % \
             bound
 
         self.assertEqual(expected, string)

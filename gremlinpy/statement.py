@@ -57,7 +57,7 @@ class Conditional(Statement):
             raise StatmentError(error)
 
         #build the if statement
-        if_condition = UnboudFunctionRaw(gremlin, 'if', [self.if_condition])
+        if_condition = UnboudFunctionRaw(gremlin, 'if', self.if_condition)
 
         gremlin.set_graph_variable('').add_token(if_condition)
         gremlin.close(self.if_body)
@@ -65,7 +65,7 @@ class Conditional(Statement):
         #build all of the elif statements
         for i, condition in enumerate(self.elif_condition):
             body = self.elif_body[i]
-            elif_condition = UnboudFunctionRaw(gremlin, 'elseif', [condition])
+            elif_condition = UnboudFunctionRaw(gremlin, 'elseif', condition)
 
             gremlin.add_token(elif_condition).close(body)
 
@@ -99,7 +99,7 @@ class GetEdge(Statement):
 
     def build(self):
         if self.bind_ids:
-            out_id = self.gremlin.bind_param(self.out_v_id, 'V_OUT_ID')
+            out_id = self.gremlin.bind_param(self.out_v_id, 'V_OUT_IDx')
             in_id = self.gremlin.bind_param(self.in_v_id, 'V_IN_ID')
         else:
             out_id = [self.out_v_id]
@@ -110,5 +110,5 @@ class GetEdge(Statement):
 
         self.gremlin.V(out_id[0])
         getattr(self.gremlin, self.direction)(label[0])
-        self.gremlin.func('as', back[0]).inV()
-        self.gremlin.hasId(in_id[0]).select(back[0])
+        self.gremlin.AS("'vertex'").inV()
+        self.gremlin.hasId(in_id[0]).select("'vertex'")

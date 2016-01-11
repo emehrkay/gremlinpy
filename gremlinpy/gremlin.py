@@ -1,3 +1,4 @@
+import sys
 import uuid
 import copy
 
@@ -55,7 +56,6 @@ class LinkList(object):
         """
         while token:
             string = str(token)
-            next = token.next
 
             if len(tokens) and token.concat and self.can_use(prev, token):
                 if type(prev) == GraphVariable:
@@ -130,17 +130,20 @@ class Gremlin(LinkList):
         func_name = str(self.bottom)
 
         if len(args) and issubclass(type(args[-1]), Predicate):
-            func = UnboudFunction
+            func = UnboudFunction(self, func_name, *args)
+        elif func_name in globals():
+            mod = sys.modules[__name__]
+            pred = getattr(mod, func_name)(*args)
+            func = pred.bottom
         else:
-            func = Function
+            func = Function(self, func_name, *args)
 
-        func = func(self, func_name, tuple(args))
         self.bottom.next = func
 
         return self.remove_token(self.bottom).add_token(func)
 
     def __getitem__(self, val):
-        #TODO: clean this up
+        # TODO: clean this up
         if type(val) is not slice:
             val = val if type(val) is list or type(val) is tuple else [val]
 
@@ -191,8 +194,8 @@ class Gremlin(LinkList):
                     break
 
         if name is None:
-            name = '{}_{}_{}'.format(self.PARAM_PREFIX, self.bound_param, \
-                self.bound_count)
+            name = '{}_{}_{}'.format(self.PARAM_PREFIX, self.bound_param,
+                                     self.bound_count)
 
         self.bound_params[name] = value
 
@@ -205,28 +208,28 @@ class Gremlin(LinkList):
         return self.func_raw_unbound('range', *(start, end))
 
     def unbound(self, function, *args):
-        unbound = UnboudFunction(self, function, args)
+        unbound = UnboudFunction(self, function, *args)
 
         return self.add_token(unbound)
 
     def func(self, function, *args):
-        func = Function(self, function, tuple(args))
+        func = Function(self, function, *args)
 
         return self.add_token(func)
 
     def func_raw(self, function, *args):
-        func_raw = FunctionRaw(self, function, args)
+        func_raw = FunctionRaw(self, function, *args)
 
         return self.add_token(func_raw)
 
     def func_raw_unbound(self, function, *args):
-        func_raw = UnboudFunctionRaw(self, function, args)
+        func_raw = UnboudFunctionRaw(self, function, *args)
 
         return self.add_token(func_raw)
 
     def close(self, value, *args):
         if args:
-            close = ClosureArguments(self, value, args)
+            close = ClosureArguments(self, value, *args)
         else:
             close = Closure(self, value)
 
@@ -319,15 +322,15 @@ class Token(Link, _Tokenable):
     args = []
     concat = ''
 
-    def __init__(self, gremlin, value, args=None):
+    def __init__(self, gremlin, value, *args):
         self.gremlin = gremlin
         self.value = self.fix_value(value)
-
-        if args is None:
-            args = []
-
-        # self.args = [self.fix_value(a) for a in args]
         self.args = list(args)
+        # if args is None:
+        #     args = []
+        #
+        # # self.args = [self.fix_value(a) for a in args]
+        # self.args = list(args)
 
 
 class GraphVariable(Token):
@@ -459,7 +462,8 @@ class Predicate(Gremlin, metaclass=_MetaPredicate):
     def __init__(self, *args):
         super(Predicate, self).__init__(None)
         self.args = args
-        getattr(self, self._function)(*args)
+
+        self.unbound(self._function, *args)
 
     @property
     def _function(self, *args):
@@ -527,6 +531,12 @@ class without(Predicate):
 
 
 class select(Predicate):
+    """Allows for non-binding of select steps"""
+    pass
+
+
+class AS(Predicate):
+    """Allows for non-binding of as steps"""
     pass
 
 
