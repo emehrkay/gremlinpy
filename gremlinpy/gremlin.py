@@ -483,7 +483,10 @@ class pp(Predicate):
 
 
 class IS(Predicate):
-    pass
+
+    @property
+    def _function(self, *args):
+        return 'is'
 
 
 class eq(Predicate):
@@ -537,7 +540,70 @@ class select(Predicate):
 
 class AS(Predicate):
     """Allows for non-binding of as steps"""
+
+    @property
+    def _function(self, *args):
+        return 'as'
+
+class out(Predicate):
+
+    @property
+    def _function(self, *args):
+        return 'out'
+
+
+class outE(Predicate):
+
+    @property
+    def _function(self, *args):
+        return 'outE'
+
+
+class outV(Predicate):
+
+    @property
+    def _function(self, *args):
+        return 'outV'
+
+
+class IN(Predicate):
+
+    @property
+    def _function(self, *args):
+        return 'in'
+
+
+class INV(Predicate):
+
+    @property
+    def _function(self, *args):
+        return 'inV'
+
+
+
+class INE(Predicate):
+
+    @property
+    def _function(self, *args):
+        return 'inE'
+
+
+class both(Predicate):
     pass
+
+
+class bothE(Predicate):
+
+    @property
+    def _function(self, *args):
+        return 'bothE'
+
+
+class bothV(Predicate):
+
+    @property
+    def _function(self, *args):
+        return 'bothV'
 
 
 _ = Predicate()

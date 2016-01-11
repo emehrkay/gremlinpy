@@ -1,11 +1,17 @@
+## 3.2.1
+
+Changed:
+* Added new predicates: out, outE, outV, in, inE, inV, both, bothE, bothV
+
 ## 3.2.0
 
 Fixed:
 * Predicates now work correctly
 
-Broken:
+Changed:
 * When manually adding a token via gremlin.add_token the arguments for the token itself previously required them to be wrapped in a list. This was confusing and caused pain within the tiny library. I removed this in favor of *args and since the lib is in its infancy, this will not cause a version change.
 * Made AS (which evals to as()) a predicate because its arguments should not be bound when called.
+* Predicates now nolonger bind parameters. They utilitze UnboundFunction under the hood.
 
 ## 3.1.2
 

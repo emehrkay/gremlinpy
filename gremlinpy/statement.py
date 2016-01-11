@@ -93,7 +93,7 @@ class GetEdge(Statement):
 
         self.out_v_id = out_v_id
         self.in_v_id = in_v_id
-        self.label = label
+        self.label = "'{}'".format(label)
         self.bind_ids = bind_ids
         self.direction = self.directions[direction]
 
@@ -109,6 +109,6 @@ class GetEdge(Statement):
         back = self.gremlin.bind_param('vertex', 'VERTEX')
 
         self.gremlin.V(out_id[0])
-        getattr(self.gremlin, self.direction)(label[0])
+        getattr(self.gremlin, self.direction)(self.label)
         self.gremlin.AS("'vertex'").inV()
         self.gremlin.hasId(in_id[0]).select("'vertex'")
