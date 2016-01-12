@@ -495,9 +495,34 @@ class PredicateTests(unittest.TestCase):
         g.function(lt(arg).out())
 
         string = str(g)
-        expected = 'g.function(lt(%s).out())' % (arg)
+        params = g.bound_params
+        argument = get_dict_key(params, arg)
+        expected = 'g.function(lt(%s).out())' % (argument)
 
         self.assertEqual(expected, string)
+
+    def test_can_pass_bound_param_to_predicate(self):
+        g = Gremlin()
+        val = 'test'+ str(random())
+        param = 'param'
+        bound = g.bind_param(val, param)
+        pred = lt(bound[0], gremlin=g)
+        expected = 'lt({})'.format(param)
+        actual = str(pred)
+
+        self.assertEqual(expected, actual)
+
+    def test_can_pass_bound_param_to_embedded_predicate(self):
+        g = Gremlin()
+        val = 'test'+ str(random())
+        param = 'param'
+        bound = g.bind_param(val, param)
+        pred = lt(bound[0], gremlin=g)
+        g.function(pred)
+        expected = 'g.function(lt({}))'.format(param)
+        actual = str(g)
+
+        self.assertEqual(expected, actual)
 
     def test_can_pass_two_predicates_to_function(self):
         arg = str(random())
@@ -506,7 +531,10 @@ class PredicateTests(unittest.TestCase):
         g.function(lt(arg).out(), lt(arg2))
 
         string = str(g)
-        expected = 'g.function(lt(%s).out(), lt(%s))' % (arg, arg2)
+        params = g.bound_params
+        argument = get_dict_key(params, arg)
+        argument2 = get_dict_key(params, arg2)
+        expected = 'g.function(lt(%s).out(), lt(%s))' % (argument, argument2)
 
         self.assertEqual(expected, string)
 
@@ -517,10 +545,12 @@ class PredicateTests(unittest.TestCase):
         g.function(lt(arg).out(lt(arg2)))
 
         string = str(g)
-        expected = 'g.function(lt(%s).out(lt(%s)))' % (arg, arg2)
+        params = g.bound_params
+        argument = get_dict_key(params, arg)
+        argument2 = get_dict_key(params, arg2)
+        expected = 'g.function(lt(%s).out(lt(%s)))' % (argument, argument2)
 
         self.assertEqual(expected, string)
-
 
 
 if __name__ == '__main__':

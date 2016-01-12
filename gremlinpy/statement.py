@@ -79,6 +79,10 @@ class Conditional(Statement):
 
 
 class GetEdge(Statement):
+    bound_in_id = 'V_IN_ID'
+    bound_out_id = 'V_OUT_ID'
+    bound_label = 'EDGE_LABEL_NAME'
+    bound_entity = 'EDGE_ENTITY'
     directions = {
         'both': 'bothE',
         'in': 'inE',
@@ -93,22 +97,24 @@ class GetEdge(Statement):
 
         self.out_v_id = out_v_id
         self.in_v_id = in_v_id
-        self.label = "'{}'".format(label)
+        self.label = label
         self.bind_ids = bind_ids
         self.direction = self.directions[direction]
 
     def build(self):
         if self.bind_ids:
-            out_id = self.gremlin.bind_param(self.out_v_id, 'V_OUT_IDx')
-            in_id = self.gremlin.bind_param(self.in_v_id, 'V_IN_ID')
+            out_id = self.gremlin.bind_param(self.out_v_id, self.bound_out_id)
+            in_id = self.gremlin.bind_param(self.in_v_id, self.bound_in_id)
         else:
             out_id = [self.out_v_id]
             in_id = [self.in_v_id]
 
-        label = self.gremlin.bind_param(self.label, 'LABEL')
-        back = self.gremlin.bind_param('vertex', 'VERTEX')
+        label = self.gremlin.bind_param(self.label, self.bound_label)
+        back = self.gremlin.bind_param(self.bound_entity.lower(), 
+                                       self.bound_entity)
 
         self.gremlin.V(out_id[0])
         getattr(self.gremlin, self.direction)(self.label)
-        self.gremlin.AS("'vertex'").inV()
-        self.gremlin.hasId(in_id[0]).select("'vertex'")
+        # self.gremlin.func('as', back[0]).inV()
+        self.gremlin.AS(back[0]).inV()
+        self.gremlin.hasId(in_id[0]).select(back[0])

@@ -1,3 +1,15 @@
+## 3.2.2
+
+Changed:
+* Predicates now back to binding arguments.
+
+Fixed:
+* When defining a parent gremlin object, the corrent parameters are bound up the chain
+* Fixed the GetEdge statement
+
+Removed:
+* A bunch of newly added predicates: out, outE, outV, in, inE, inV, both, bothE, bothV -- they were deemed unnecessary
+
 ## 3.2.1
 
 Changed:

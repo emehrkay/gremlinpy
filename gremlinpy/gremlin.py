@@ -81,11 +81,14 @@ class Link(object):
 class Gremlin(LinkList):
     PARAM_PREFIX = 'GPY_PARAM'
 
-    def __init__(self, graph_variable=GRAPH_VARIABLE):
+    def __init__(self, graph_variable=GRAPH_VARIABLE, parent=None):
         self.gv = graph_variable
         self.top = GraphVariable(self, graph_variable)
 
         self.reset()
+
+        if parent:
+            self.set_parent_gremlin(parent)
 
     def reset(self):
         self.parent = None
@@ -131,9 +134,9 @@ class Gremlin(LinkList):
 
         if len(args) and issubclass(type(args[-1]), Predicate):
             func = UnboudFunction(self, func_name, *args)
-        elif func_name in globals():
+        elif func_name in _PREDICATES.keys():
             mod = sys.modules[__name__]
-            pred = getattr(mod, func_name)(*args)
+            pred = getattr(mod, func_name)(*args, gremlin=self)
             func = pred.bottom
         else:
             func = Function(self, func_name, *args)
@@ -170,27 +173,38 @@ class Gremlin(LinkList):
     def set_parent_gremlin(self, gremlin):
         self.parent = gremlin
 
-        return self.bind_params(self.bound_params)
+        return self.bind_params(gremlin.bound_params)
 
     def bind_params(self, params=None):
         if params is None:
             params = []
 
-        for value in params:
-            self.bind_param(value)
+        if isinstance(params, dict):
+            for name, value in params.items():
+                self.bind_param(value, name)
+        else:
+            for value in params:
+                self.bind_param(value)
 
         return self.bound_params
 
     def bind_param(self, value, name=None):
         self.bound_count += 1
 
-        if value in self.bound_params:
-            name = value
-            value = self.bound_params[value]
-        elif value in self.stack_bound_params.values():
+        # if value in self.stack_bound_params.values():
+        #     name = value
+        #     value = self.stack_bound_params[value]
+        # el
+        if value in self.stack_bound_params.values():
             for n, v in self.bound_params.items():
                 if v == value:
                     name = n
+                    break
+        elif value in self.stack_bound_params.keys():
+            for n, v in self.bound_params.items():
+                if n == value:
+                    name = n
+                    value = v
                     break
 
         if name is None:
@@ -459,11 +473,11 @@ class _MetaPredicate(type):
 
 class Predicate(Gremlin, metaclass=_MetaPredicate):
 
-    def __init__(self, *args):
-        super(Predicate, self).__init__(None)
-        self.args = args
+    def __init__(self, *args, gremlin=None):
+        super(Predicate, self).__init__(None, gremlin)
 
-        self.unbound(self._function, *args)
+        self.args = args
+        self.func(self._function, *args)
 
     @property
     def _function(self, *args):
@@ -480,13 +494,6 @@ class p(Predicate):
 
 class pp(Predicate):
     pass
-
-
-class IS(Predicate):
-
-    @property
-    def _function(self, *args):
-        return 'is'
 
 
 class eq(Predicate):
@@ -533,77 +540,33 @@ class without(Predicate):
     pass
 
 
+class IS(Predicate):
+    """Allows for easy use of 'is' in steps"""
+
+    @property
+    def _function(self, *args):
+        return 'is'
+
+
 class select(Predicate):
-    """Allows for non-binding of select steps"""
+    """Allows for easy use of select steps"""
     pass
 
 
 class AS(Predicate):
-    """Allows for non-binding of as steps"""
+    """Allows for easy use of as in steps"""
 
     @property
     def _function(self, *args):
         return 'as'
 
-class out(Predicate):
-
-    @property
-    def _function(self, *args):
-        return 'out'
-
-
-class outE(Predicate):
-
-    @property
-    def _function(self, *args):
-        return 'outE'
-
-
-class outV(Predicate):
-
-    @property
-    def _function(self, *args):
-        return 'outV'
-
 
 class IN(Predicate):
+    """Allows for easy use of 'in' in steps"""
 
     @property
     def _function(self, *args):
         return 'in'
-
-
-class INV(Predicate):
-
-    @property
-    def _function(self, *args):
-        return 'inV'
-
-
-
-class INE(Predicate):
-
-    @property
-    def _function(self, *args):
-        return 'inE'
-
-
-class both(Predicate):
-    pass
-
-
-class bothE(Predicate):
-
-    @property
-    def _function(self, *args):
-        return 'bothE'
-
-
-class bothV(Predicate):
-
-    @property
-    def _function(self, *args):
-        return 'bothV'
 
 
 _ = Predicate()

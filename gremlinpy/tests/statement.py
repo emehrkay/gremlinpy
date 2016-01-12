@@ -228,9 +228,9 @@ class PackagedStatementTests(unittest.TestCase):
         oid = get_dict_key(params, out_id)
         iid = get_dict_key(params, in_id)
         label_b = get_dict_key(params, label)
-        as_b = get_dict_key(params, 'vertex')
-        bound = (oid, label_b, iid)
-        expected = "g.V(%s).bothE(%s).as('vertex').inV().hasId(%s).select('vertex')" % \
+        as_b = e.bound_entity
+        bound = (oid, label_b, as_b, iid, as_b)
+        expected = 'g.V(%s).bothE(%s).as(%s).inV().hasId(%s).select(%s)' % \
             bound
 
         self.assertEqual(expected, string)
