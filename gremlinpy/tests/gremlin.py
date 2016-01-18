@@ -2,6 +2,7 @@ from random import randrange, random
 import unittest
 
 from gremlinpy.gremlin import *
+from gremlinpy.gremlin import _
 
 
 def get_dict_key(dict, value):
@@ -551,6 +552,31 @@ class PredicateTests(unittest.TestCase):
         expected = 'g.function(lt(%s).out(lt(%s)))' % (argument, argument2)
 
         self.assertEqual(expected, string)
+
+    def test_can_create_dynamic_predicate(self):
+        ran = 'someFunc'+ str(random())
+        pred = _(ran)
+        g = Gremlin()
+        g.function(pred)
+
+        expected = 'g.function({}())'.format(ran)
+        s = str(g)
+
+        self.assertEqual(s, expected)
+
+    def test_can_nest_dynamically_created_predicates(self):
+        ran = 'someFunc'+ str(random())
+        ran2 = 'outer'+ str(random())
+        pred = _(ran)
+        pred2 = _(ran2, pred)
+        g = Gremlin()
+        g.function(pred2)
+
+        expected = 'g.function({}({}()))'.format(ran2, ran)
+        s = str(g)
+
+        self.assertEqual(s, expected)
+        
 
 
 if __name__ == '__main__':

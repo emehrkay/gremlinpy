@@ -1,3 +1,14 @@
+## 3.3.0
+
+Added:
+* _ function that allows you to dynamically create predicates. _('myPredicate', arg, arg2, ...argN)
+
+Changed:
+* Predicates are no longer forced to lower case. If there needs to be a different representation for the predidate, overwrite the _function method
+
+Fixed:
+* There was an error in type checking for Functions' arguments regarding Gremlin instances (fixed in a few other places too).
+
 ## 3.2.2
 
 Changed:

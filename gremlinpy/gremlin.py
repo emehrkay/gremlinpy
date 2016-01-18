@@ -1,6 +1,7 @@
 import sys
 import uuid
 import copy
+import re
 
 from .exception import *
 from .statement import Statement
@@ -385,7 +386,7 @@ class Function(Token):
                 self.apply_statment(bound)
 
                 params.append(str(bound))
-            elif type(bound) is Gremlin:
+            elif issubclass(type(bound), Gremlin):
                 bound.set_parent_gremlin(self.gremlin)
 
                 params.append(str(bound))
@@ -426,11 +427,11 @@ class Index(Token):
 class Closure(Token):
 
     def __unicode__(self):
-        if type(self.value) is Statement:
+        if issubclass(type(self.value), Statement):
             self.gremlin.apply_statment(self.value)
 
             self.value = str(self.gremlin)
-        elif type(self.value) is Gremlin:
+        elif issubclass(type(self.value), Gremlin):
             self.value.set_parent_gremlin(self.gremlin)
 
         return '{%s}' % str(self.value)
@@ -439,11 +440,11 @@ class Closure(Token):
 class ClosureArguments(Token):
 
     def __unicode__(self):
-        if type(self.value) is Statement:
+        if issubclass(type(bound), Statement):
             self.gremlin.apply_statment(self.value)
 
             self.value = str(self.gremlin)
-        elif type(self.value) is Gremlin:
+        elif issubclass(type(self.value), Gremlin):
             self.value.set_parent_gremlin(self.gremlin)
 
         return '{{} -> {}}'.format(','.join(self.args), str(self.value))
@@ -456,7 +457,7 @@ class Raw(Token):
             self.apply_statement(self.value)
 
             self.value = str(self.value)
-        elif type(self.value) is Gremlin:
+        elif issubclass(type(self.value), Gremlin):
             self.value.set_parent_gremlin(self.gremlin)
 
         return str(self.value)
@@ -481,7 +482,7 @@ class Predicate(Gremlin, metaclass=_MetaPredicate):
 
     @property
     def _function(self, *args):
-        return str(self.__class__.__name__).lower()
+        return str(self.__class__.__name__)
 
 
 class __(Predicate):
@@ -569,4 +570,8 @@ class IN(Predicate):
         return 'in'
 
 
-_ = Predicate()
+def _(method, *args):
+    """method used to create predicates dynamically"""
+    kls = type(method, (Predicate,), {})
+
+    return kls(*args)
