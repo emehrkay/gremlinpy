@@ -35,5 +35,6 @@ setup(
         'Operating System :: POSIX :: Linux',
         'Operating System :: MacOS',
         'Operating System :: MacOS :: MacOS X',
-    ]
+    ],
+    test_suite = 'gremlinpy.tests',
 )
