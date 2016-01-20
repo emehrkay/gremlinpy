@@ -17,6 +17,9 @@ setup(
     author = 'Mark Henderson',
     author_email = 'emehrkay@gmail.com',
     long_description = __doc__,
+    install_requires = [
+        'six',
+    ],
     classifiers = [
         'License :: OSI Approved :: MIT License',
         'Development Status :: 3 - Alpha',

@@ -1,3 +1,9 @@
+## 3.4.0
+
+Added:
+* six dependency
+* Python 2.7 support
+
 ## 3.3.0
 
 Added:

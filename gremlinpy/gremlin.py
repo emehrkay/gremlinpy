@@ -3,6 +3,8 @@ import uuid
 import copy
 import re
 
+from six import with_metaclass
+
 from .exception import *
 from .statement import Statement
 from .config import GRAPH_VARIABLE
@@ -472,9 +474,10 @@ class _MetaPredicate(type):
         return cls
 
 
-class Predicate(Gremlin, metaclass=_MetaPredicate):
+class Predicate(with_metaclass(_MetaPredicate, Gremlin)):
 
-    def __init__(self, *args, gremlin=None):
+    def __init__(self, *args, **kwargs):
+        gremlin = kwargs.get('gremlin', None)
         super(Predicate, self).__init__(None, gremlin)
 
         self.args = args
