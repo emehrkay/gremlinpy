@@ -3,8 +3,6 @@ Gremlinpy
 
 Gremlinpy is a small library that allows you to write pure Python 3 and output Gremlin script complete with bound parameters that can be run against a Tinkerpop 3 Gremlin server instance. It is meant to be a low-level way for your application to communicate its intent with the graph server.
 
-> If you need Python 2 support, checkout the tp2 branch.
-
 ##Setup
 
     python setup.py install
