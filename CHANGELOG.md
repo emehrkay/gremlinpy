@@ -1,3 +1,8 @@
+## 3.4.0.1
+
+Added:
+* simple test runner to setup.py
+
 ## 3.4.0
 
 Added:
