@@ -6,7 +6,9 @@ Gremlinpy is a graph abstraction layer that converts Python objects
 to Gremlin/Groovy strings.
 """
 from setuptools import setup, find_packages
-from gremlinpy import __version__
+
+# get the version information
+exec(open('gremlinpy/version.py').read())
 
 setup(
     name = 'gremlinpy',

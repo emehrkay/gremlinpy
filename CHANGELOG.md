@@ -1,3 +1,8 @@
+## 3.4.1
+
+Fixed:
+* Error with install proceedure. Moved version number outside of gremlinpy.__init__.py
+
 ## 3.4.0.1
 
 Added:
