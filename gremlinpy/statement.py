@@ -87,6 +87,9 @@ class GetEdge(Statement):
         'both': 'bothE',
         'in': 'inE',
         'out': 'outE'}
+    vertex_directions = {
+        'in': 'inV',
+        'out': 'outV'}
 
     def __init__(self, out_v_id, in_v_id, label, direction='both', \
                  bind_ids=True):
@@ -94,12 +97,17 @@ class GetEdge(Statement):
             error = 'The direction must be: ' + \
                 ', '.join(self.directions.keys())
             raise ValueError(error)
+        other = 'in'
+
+        if direction != 'both':
+            other = 'in' if direction == 'out' else 'out'
 
         self.out_v_id = out_v_id
         self.in_v_id = in_v_id
         self.label = label
         self.bind_ids = bind_ids
         self.direction = self.directions[direction]
+        self.vertex_direction = self.vertex_directions[other]
 
     def build(self):
         if self.bind_ids:
@@ -110,11 +118,10 @@ class GetEdge(Statement):
             in_id = [self.in_v_id]
 
         label = self.gremlin.bind_param(self.label, self.bound_label)
-        back = self.gremlin.bind_param(self.bound_entity.lower(), 
+        back = self.gremlin.bind_param(self.bound_entity.lower(),
                                        self.bound_entity)
 
         self.gremlin.V(out_id[0])
         getattr(self.gremlin, self.direction)(self.label)
-        # self.gremlin.func('as', back[0]).inV()
-        self.gremlin.AS(back[0]).inV()
+        self.gremlin.AS(back[0]).func(self.vertex_direction)
         self.gremlin.hasId(in_id[0]).select(back[0])

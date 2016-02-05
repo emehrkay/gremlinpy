@@ -214,7 +214,7 @@ class PackagedStatementTests(unittest.TestCase):
         self.assertTrue(string == expected)
         self.assertTrue(len(params) == 0)
 
-    def test_can_make_get_edge_statement(self):
+    def test_can_make_get_edge_statement_both_direction(self):
         out_id = 1
         in_id = 9
         label = 'knows'
@@ -231,6 +231,48 @@ class PackagedStatementTests(unittest.TestCase):
         as_b = e.bound_entity
         bound = (oid, label_b, as_b, iid, as_b)
         expected = 'g.V(%s).bothE(%s).as(%s).inV().hasId(%s).select(%s)' % \
+            bound
+
+        self.assertEqual(expected, string)
+
+    def test_can_make_get_edge_statement_in_direction(self):
+        out_id = 1
+        in_id = 9
+        label = 'knows'
+        g = Gremlin()
+        e = GetEdge(out_id, in_id, label, 'in')
+
+        g.apply_statement(e)
+
+        string = str(g)
+        params = g.bound_params
+        oid = get_dict_key(params, out_id)
+        iid = get_dict_key(params, in_id)
+        label_b = get_dict_key(params, label)
+        as_b = e.bound_entity
+        bound = (oid, label_b, as_b, iid, as_b)
+        expected = 'g.V(%s).inE(%s).as(%s).outV().hasId(%s).select(%s)' % \
+            bound
+
+        self.assertEqual(expected, string)
+
+    def test_can_make_get_edge_statement_out_direction(self):
+        out_id = 1
+        in_id = 9
+        label = 'knows'
+        g = Gremlin()
+        e = GetEdge(out_id, in_id, label, 'out')
+
+        g.apply_statement(e)
+
+        string = str(g)
+        params = g.bound_params
+        oid = get_dict_key(params, out_id)
+        iid = get_dict_key(params, in_id)
+        label_b = get_dict_key(params, label)
+        as_b = e.bound_entity
+        bound = (oid, label_b, as_b, iid, as_b)
+        expected = 'g.V(%s).outE(%s).as(%s).inV().hasId(%s).select(%s)' % \
             bound
 
         self.assertEqual(expected, string)

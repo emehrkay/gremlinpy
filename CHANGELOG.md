@@ -1,3 +1,8 @@
+# 3.4.2
+
+Fixed:
+* Error with GetEdge Statement regarding direction of other edge. It now takes into account which direction the statement is attempting to check.
+
 ## 3.4.1
 
 Fixed:
