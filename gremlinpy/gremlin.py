@@ -11,6 +11,7 @@ from .config import GRAPH_VARIABLE
 
 
 _PREDICATES = {}
+MODULE = sys.modules[__name__]
 
 
 class LinkList(object):
@@ -137,9 +138,8 @@ class Gremlin(LinkList):
 
         if len(args) and issubclass(type(args[-1]), Predicate):
             func = UnboudFunction(self, func_name, *args)
-        elif func_name in _PREDICATES.keys():
-            mod = sys.modules[__name__]
-            pred = getattr(mod, func_name)(*args, gremlin=self)
+        elif func_name in _PREDICATES.keys() and hasattr(MODULE, func_name):
+            pred = getattr(MODULE, func_name)(*args, gremlin=self)
             func = pred.bottom
         else:
             func = Function(self, func_name, *args)
@@ -488,10 +488,6 @@ class Predicate(with_metaclass(_MetaPredicate, Gremlin)):
         return str(self.__class__.__name__)
 
 
-class __(Predicate):
-    pass
-
-
 class p(Predicate):
     pass
 
@@ -578,3 +574,6 @@ def _(method, *args):
     kls = type(method, (Predicate,), {})
 
     return kls(*args)
+
+
+__ = Gremlin('__')
