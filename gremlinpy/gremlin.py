@@ -82,6 +82,13 @@ class Link(object):
     next = None
 
 
+class Param(object):
+
+    def __init__(self, name, value):
+        self.name = name
+        self.value = value
+
+
 class Gremlin(LinkList):
     PARAM_PREFIX = 'GPY_PARAM'
 
@@ -176,6 +183,8 @@ class Gremlin(LinkList):
     def set_parent_gremlin(self, gremlin):
         self.parent = gremlin
 
+        gremlin.bind_params(self.bound_params)
+
         return self.bind_params(gremlin.bound_params)
 
     def bind_params(self, params=None):
@@ -194,10 +203,10 @@ class Gremlin(LinkList):
     def bind_param(self, value, name=None):
         self.bound_count += 1
 
-        # if value in self.stack_bound_params.values():
-        #     name = value
-        #     value = self.stack_bound_params[value]
-        # el
+        if isinstance(value, Param):
+            name = value.name
+            value = value.value
+
         if value in self.stack_bound_params.values():
             for n, v in self.bound_params.items():
                 if v == value:
@@ -343,11 +352,6 @@ class Token(Link, _Tokenable):
         self.gremlin = gremlin
         self.value = self.fix_value(value)
         self.args = list(args)
-        # if args is None:
-        #     args = []
-        #
-        # # self.args = [self.fix_value(a) for a in args]
-        # self.args = list(args)
 
 
 class GraphVariable(Token):
