@@ -95,6 +95,7 @@ class Gremlin(LinkList):
     def __init__(self, graph_variable=GRAPH_VARIABLE, parent=None):
         self.gv = graph_variable
         self.top = GraphVariable(self, graph_variable)
+        self._gremlins = []
 
         self.reset()
 
@@ -102,6 +103,12 @@ class Gremlin(LinkList):
             self.set_parent_gremlin(parent)
 
     def reset(self):
+        if self.parent:
+            self.parent.reset()
+
+        for gremlin in self._gremlins:
+            gremlin.reset()
+
         self.parent = None
         self.bottom = self.top
         self.bound_params = {}
@@ -109,6 +116,7 @@ class Gremlin(LinkList):
         self.bound_count = 0
         self.top.next = None
         self.return_var = None
+        self._gremlins = []
 
         return self.set_graph_variable(self.gv)
 
@@ -183,6 +191,7 @@ class Gremlin(LinkList):
     def set_parent_gremlin(self, gremlin):
         self.parent = gremlin
 
+        self._gremlins.append(gremlin)
         gremlin.bind_params(self.bound_params)
 
         return self.bind_params(gremlin.bound_params)
@@ -580,4 +589,19 @@ def _(method, *args):
     return kls(*args)
 
 
-__ = Gremlin('__')
+class Anon(object):
+    """class used to create new Gremlin instances every time an anonymous
+    traversal is started with the __"""
+
+    def __init__(self):
+        pass
+
+    def __getattr__(self, attr):
+        gremlin = Gremlin('__')
+
+        getattr(gremlin, attr)
+
+        return gremlin
+
+
+__ = Anon()
