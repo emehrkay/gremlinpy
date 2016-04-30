@@ -96,6 +96,7 @@ class Gremlin(LinkList):
         self.gv = graph_variable
         self.top = GraphVariable(self, graph_variable)
         self._gremlins = []
+        self.parent = None
 
         self.reset()
 
