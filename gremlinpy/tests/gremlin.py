@@ -524,7 +524,7 @@ class GremlinInjectionTests(unittest.TestCase):
         age = get_dict_key(params, d['age'])
         expected = ("g.function(name, {})"
                     ".nest(__.has('name', {}).age({})"
-                    ".nest(_.name({})))").format(name,name, age, name)
+                    ".nest(_.name({})))").format(name, name, age, name)
 
         self.assertEqual(2, len(params))
         self.assertEqual(expected, string)
