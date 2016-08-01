@@ -217,14 +217,14 @@ class Gremlin(LinkList):
             name = value.name
             value = value.value
 
-        if value in self.stack_bound_params.values():
+        if not name and value in self.stack_bound_params.values():
             for n, v in self.bound_params.items():
-                if v == value and not name:
+                if v == value:
                     name = n
                     break
-        elif value in self.stack_bound_params.keys():
+        elif not name and value in self.stack_bound_params.keys():
             for n, v in self.bound_params.items():
-                if n == value and not name:
+                if n == value:
                     name = n
                     value = v
                     break
