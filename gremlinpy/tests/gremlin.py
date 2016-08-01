@@ -487,6 +487,48 @@ class GremlinInjectionTests(unittest.TestCase):
         self.assertEqual(expected, string)
         self.assertEqual(len(params), 2)
 
+    def test_can_nest_with_unbound_params_of_same_value(self):
+        g = Gremlin()
+        n = Gremlin()
+        d = {'name': str(random()), 'age': str(random())}
+
+        n.set_graph_variable('__').has("'name'", d['name'])
+        n.func('age', d['age'])
+        g.function('name', d['name']).nest(n)
+
+        string = str(g)
+        params = g.bound_params
+        name = get_dict_key(params, d['name'])
+        age = get_dict_key(params, d['age'])
+        expected = ("g.function(name, {})"
+                    ".nest(__.has('name', {}).age({}))").format(name,
+                                                                name, age)
+
+        self.assertEqual(2, len(params))
+        self.assertEqual(expected, string)
+
+    def test_can_double_nest_with_unbound_params_of_same_value(self):
+        g = Gremlin()
+        n = Gremlin()
+        nn = Gremlin()
+        d = {'name': str(random()), 'age': str(random())}
+
+        nn.set_graph_variable('_').func('name', d['name'])
+        n.set_graph_variable('__').has("'name'", d['name'])
+        n.func('age', d['age']).nest(nn)
+        g.function('name', d['name']).nest(n)
+
+        string = str(g)
+        params = g.bound_params
+        name = get_dict_key(params, d['name'])
+        age = get_dict_key(params, d['age'])
+        expected = ("g.function(name, {})"
+                    ".nest(__.has('name', {}).age({})"
+                    ".nest(_.name({})))").format(name, name, age, name)
+
+        self.assertEqual(2, len(params))
+        self.assertEqual(expected, string)
+
 
 class PredicateTests(unittest.TestCase):
 
