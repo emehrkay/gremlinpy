@@ -1,3 +1,13 @@
+# 3.4.4
+
+Fixed:
+* Error with binding params of parent Gremlin instances overwriting params inherited from children -- https://github.com/emehrkay/gremlinpy/pull/4
+
+# 3.4.3
+
+Fixed:
+* Error with binding params of parent Gremlin instances overwriting params inherited from children -- https://github.com/emehrkay/gremlinpy/issues/2
+
 # 3.4.2
 
 Fixed:
@@ -6,7 +16,7 @@ Fixed:
 ## 3.4.1
 
 Fixed:
-* Error with install proceedure. Moved version number outside of gremlinpy.__init__.py
+* Error with install procedure. Moved version number outside of gremlinpy.__init__.py
 
 ## 3.4.0.1
 
@@ -36,7 +46,7 @@ Changed:
 * Predicates now back to binding arguments.
 
 Fixed:
-* When defining a parent gremlin object, the corrent parameters are bound up the chain
+* When defining a parent gremlin object, the current parameters are bound up the chain
 * Fixed the GetEdge statement
 
 Removed:
