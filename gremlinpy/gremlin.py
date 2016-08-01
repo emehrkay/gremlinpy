@@ -224,7 +224,7 @@ class Gremlin(LinkList):
                     break
         elif value in self.stack_bound_params.keys():
             for n, v in self.bound_params.items():
-                if n == value:
+                if n == value and not name:
                     name = n
                     value = v
                     break
