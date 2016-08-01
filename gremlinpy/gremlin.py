@@ -538,6 +538,14 @@ class inside(Predicate):
     pass
 
 
+class NOT(Predicate):
+    """Allows for easy use of 'not' in steps"""
+
+    @property
+    def _function(self, *args):
+        return 'not'
+
+
 class outside(Predicate):
     pass
 

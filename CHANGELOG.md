@@ -1,3 +1,8 @@
+# 3.5.0
+
+Added:
+* Added Not predicate as NOT
+
 # 3.4.4
 
 Fixed:
