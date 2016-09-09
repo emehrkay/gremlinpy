@@ -330,7 +330,9 @@ class _Tokenable(object):
         return statement
 
     def fix_value(self, value):
-        if isinstance(value, Token):
+        if isinstance(value, Param):
+            return self.gremlin.bind_param(value)[0]
+        elif isinstance(value, Token):
             return value
         elif isinstance(value, Predicate):
             value.gremlin = Gremlin(self.gremlin.gv)
@@ -391,7 +393,7 @@ class Function(Token):
     """
     concat = '.'
 
-    def __unicode__(self):
+    def __unicodeOLD__(self):
         params = []
 
         if len(self.args):
@@ -408,6 +410,26 @@ class Function(Token):
                 params.append(str(bound))
             else:
                 params.append(self.gremlin.bind_param(bound)[0])
+
+        return '{}({})'.format(self.value, ', '.join(params))
+
+    def __unicode__(self):
+        params = []
+
+        if len(self.args):
+            for arg in self.args:
+                if issubclass(type(arg), Statement):
+                    self.apply_statment(arg)
+
+                    params.append(str(arg))
+                elif issubclass(type(arg), Gremlin):
+                    arg.set_parent_gremlin(self.gremlin)
+
+                    params.append(str(arg))
+                elif isinstance(arg, Param):
+                    params.append(self.gremlin.bind_param(arg)[0])
+                else:
+                    params.append(self.gremlin.bind_param(arg)[0])
 
         return '{}({})'.format(self.value, ', '.join(params))
 

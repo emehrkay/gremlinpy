@@ -158,11 +158,13 @@ class GremlinTests(unittest.TestCase):
     def test_can_add_functon_two_args(self):
         g = Gremlin().function('one', 'two')
         string = str(g)
-        bind, value = g.bound_params.copy().popitem()
-        expected = 'g.function(one, %s)' % bind
+        params = g.bound_params
+        one = get_dict_key(params, 'one')
+        two = get_dict_key(params, 'two')
+        expected = 'g.function({}, {})'.format(one, two)
 
         self.assertEqual(string, expected)
-        self.assertEqual(len(g.bound_params), 1)
+        self.assertEqual(len(g.bound_params), 2)
 
     def test_can_add_unbound_functon_two_args(self):
         g = Gremlin().unbound('function', 'arg', 'two')
@@ -175,21 +177,25 @@ class GremlinTests(unittest.TestCase):
     def test_can_add_raw_functon_two_args(self):
         g = Gremlin().func_raw('function', 'arg', 'two')
         string = str(g)
-
-        bind, value = g.bound_params.copy().popitem()
-        expected = 'gfunction(arg, %s)' % bind
+        params = g.bound_params
+        arg = get_dict_key(params, 'arg')
+        two = get_dict_key(params, 'two')
+        expected = 'gfunction({}, {})'.format(arg, two)
 
         self.assertEqual(string, expected)
-        self.assertEqual(len(g.bound_params), 1)
+        self.assertEqual(len(g.bound_params), 2)
 
     def test_can_add_functon_three_args(self):
         g = Gremlin().function('one', 'two', 'three')
         string = str(g)
-        bind, value = g.bound_params.copy().popitem()
-        expected = 'g.function(one, two, %s)' % bind
+        params = g.bound_params
+        one = get_dict_key(params, 'one')
+        two = get_dict_key(params, 'two')
+        three = get_dict_key(params, 'three')
+        expected = 'g.function({}, {}, {})'.format(one, two, three)
 
         self.assertEqual(string, expected)
-        self.assertEqual(len(g.bound_params), 1)
+        self.assertEqual(len(g.bound_params), 3)
 
     def test_can_add_functon_manually_bind_one_arg(self):
         g = Gremlin()
@@ -480,12 +486,15 @@ class GremlinInjectionTests(unittest.TestCase):
 
         string = str(g)
         params = g.bound_params
+        name_field = get_dict_key(params, 'name')
         name = get_dict_key(params, 'parent')
+        prop_field = get_dict_key(params, 'prop')
         child = get_dict_key(params, 'child')
-        expected = 'g.function(name, %s).nest(setSubProp(prop, %s))' % (name, child)
+        expected = 'g.function(%s, %s).nest(setSubProp(%s, %s))' % (name_field,
+            name, prop_field, child)
 
         self.assertEqual(expected, string)
-        self.assertEqual(len(params), 2)
+        self.assertEqual(len(params), 4)
 
 
 class PredicateTests(unittest.TestCase):
