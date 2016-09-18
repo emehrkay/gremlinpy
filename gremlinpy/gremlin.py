@@ -216,8 +216,7 @@ class Gremlin(LinkList):
         if isinstance(value, Param):
             name = value.name
             value = value.value
-
-        if value in self.stack_bound_params.values():
+        elif value in self.stack_bound_params.values():
             for n, v in self.bound_params.items():
                 if v == value:
                     name = n
