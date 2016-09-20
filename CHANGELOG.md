@@ -1,4 +1,28 @@
-# 3.4.2
+## 3.6.0
+
+Added:
+* NOT 'not' predicate
+
+Changed:
+* All args passed to all functions are bound instead of only the last one.
+* If a Param object is passed to Gremlinpy.bind_param the remaining checks for the name/value are not run.
+
+## 3.5.0
+
+Added:
+* Added Not predicate as NOT
+
+## 3.4.4
+
+Fixed:
+* Error with binding params of parent Gremlin instances overwriting params inherited from children -- https://github.com/emehrkay/gremlinpy/pull/4
+
+## 3.4.3
+
+Fixed:
+* Error with binding params of parent Gremlin instances overwriting params inherited from children -- https://github.com/emehrkay/gremlinpy/issues/2
+
+## 3.4.2
 
 Fixed:
 * Error with GetEdge Statement regarding direction of other edge. It now takes into account which direction the statement is attempting to check.
@@ -6,7 +30,7 @@ Fixed:
 ## 3.4.1
 
 Fixed:
-* Error with install proceedure. Moved version number outside of gremlinpy.__init__.py
+* Error with install procedure. Moved version number outside of gremlinpy.__init__.py
 
 ## 3.4.0.1
 
@@ -36,7 +60,7 @@ Changed:
 * Predicates now back to binding arguments.
 
 Fixed:
-* When defining a parent gremlin object, the corrent parameters are bound up the chain
+* When defining a parent gremlin object, the current parameters are bound up the chain
 * Fixed the GetEdge statement
 
 Removed:

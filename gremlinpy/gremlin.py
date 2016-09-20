@@ -216,12 +216,12 @@ class Gremlin(LinkList):
         if isinstance(value, Param):
             name = value.name
             value = value.value
-        elif value in self.stack_bound_params.values():
+        elif not name and value in self.stack_bound_params.values():
             for n, v in self.bound_params.items():
                 if v == value:
                     name = n
                     break
-        elif value in self.stack_bound_params.keys():
+        elif not name and value in self.stack_bound_params.keys():
             for n, v in self.bound_params.items():
                 if n == value:
                     name = n
@@ -537,6 +537,14 @@ class gte(Predicate):
 
 class inside(Predicate):
     pass
+
+
+class NOT(Predicate):
+    """Allows for easy use of 'not' in steps"""
+
+    @property
+    def _function(self, *args):
+        return 'not'
 
 
 class outside(Predicate):
