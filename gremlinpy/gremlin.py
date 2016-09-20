@@ -392,26 +392,6 @@ class Function(Token):
     """
     concat = '.'
 
-    def __unicodeOLD__(self):
-        params = []
-
-        if len(self.args):
-            bound = self.args.pop()
-            params = self.args
-
-            if issubclass(type(bound), Statement):
-                self.apply_statment(bound)
-
-                params.append(str(bound))
-            elif issubclass(type(bound), Gremlin):
-                bound.set_parent_gremlin(self.gremlin)
-
-                params.append(str(bound))
-            else:
-                params.append(self.gremlin.bind_param(bound)[0])
-
-        return '{}({})'.format(self.value, ', '.join(params))
-
     def __unicode__(self):
         params = []
 
@@ -594,6 +574,14 @@ class AS(Predicate):
     @property
     def _function(self, *args):
         return 'as'
+
+
+class AND(Predicate):
+    """Allows for easy use of and in steps"""
+
+    @property
+    def _function(self, *args):
+        return 'and'
 
 
 class IN(Predicate):
