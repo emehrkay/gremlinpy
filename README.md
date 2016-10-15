@@ -167,8 +167,8 @@ gremlinpy will attempt to reuse binding names in the generated script. If you pr
 
 ~~~python
 
-bound = g.bind_param('some value', 'SOME\_KEY')
-g.function(bound[0]).func2(bound[0]) # g.function(SOME\_KEY).func2(SOME_KEY)
+    bound = g.bind_param('some value', 'SOME\_KEY')
+    g.function(bound[0]).func2(bound[0]) # g.function(SOME\_KEY).func2(SOME_KEY)
 ~~~
 
 The easiest way to bind params is to use the `Param` object and pass it where needed:
@@ -219,7 +219,7 @@ Statements can be used in a few ways, the simpliest is to apply it directy to a 
     mark = HasMark()
     g.V.apply_statement(mark)
     
-    str(g) // g.V.has('name', GP_IOKH_1)
+    str(g) # g.V.has('name', GP_IOKH_1)
 ```
 
 Statements can also be chained:
@@ -238,7 +238,7 @@ Statements can also be chained:
 
     g.V.apply_statement(mark).apply_statement(sex)
     
-    str(g) // g.V.has('name', GP_IOKH_1).has('sex', GP_IOKH_2)
+    str(g) # g.V.has('name', GP_IOKH_1).has('sex', GP_IOKH_2)
 ```
 
 A statement can be passed into a Gremlin instance Function, Raw, Closure call. These statements will not modify the Gremlin instance that they are passed into. If you want the statement to have a specialized Gremlin instance, you must pass it into the statement. Otherwise a blank Gremlin instance is created and passed into the Statement.
@@ -259,7 +259,7 @@ A statement can be passed into a Gremlin instance Function, Raw, Closure call. T
     
     g.set_graph_variable('').add_token(if_con).close(v)
     
-    str(g) // if(1 == 1){g.v(GP_DDIO_1)}
+    str(g) # if(1 == 1){g.v(GP_DDIO_1)}
 ```
 
 ##Performance Tweaks
