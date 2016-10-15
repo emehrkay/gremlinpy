@@ -127,6 +127,51 @@ __Raw__: Raw allows you to put anything in and have it passed out the same way. 
 > note: this is just an example, there are better ways to do complex composition
 
 
+###Predicates
+
+GremlinGroovy has an idea called [predicates](http://tinkerpop.apache.org/docs/3.0.0-incubating/#a-note-on-predicates). A predicate can simply be seen as a traversal that starts with a function and not a graph variable.
+
+Gremlinpy supports all of the GremlinGroovy defined predicates by sub-classing a `Predicate` object.
+
+* eq
+* neq
+* lt
+* lte
+* gt
+* gte
+* inside
+* outside
+* between
+* within
+* without
+
+Gremlinpy also aliases some of the predicates that are reserved words in Python:
+
+* NOT -- not
+* IS -- is
+* AS -- as
+* IN -- in
+
+Predicates are used just like any other Gremlin instance:
+
+```python
+    from gremlinpy import Gremlin, _
+
+    g = Gremlin()
+    g.V().has('name', neq('mark')) # g.V().has(GP_OOP_1, neq(GP_OOP_2))
+    g.bound_params # {'GP_OOP_': 'name', 'GP_OOP_2': 'mark'}
+```
+
+Gremlinpy allows you to create a predicate on the fly using the `_` function:
+
+```python
+    from gremlinpy import Gremlin, _
+
+    g = Gremlin()
+    g.V().has(_('myPredicate', [1, 2])) # g.V().has(myPredicate())
+```
+
+
 ###Overloading
 
 The `Gremlin` instance has members that are basically reserved words and will not be passed to your resulting gremlin script. 
