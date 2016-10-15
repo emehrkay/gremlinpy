@@ -677,7 +677,7 @@ class PredicateTests(unittest.TestCase):
     def test_can_handle_problematic_predicates_in_diff_contexes(self):
         g = Gremlin().IN().AND(AS().IS().NOT())
         string = str(g)
-        expected = 'g.in().AND(as().is().not())'
+        expected = 'g.in().and(as().is().not())'
         params = g.bound_params
 
         self.assertEqual(0, len(params))

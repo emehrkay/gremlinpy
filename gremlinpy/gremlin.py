@@ -152,11 +152,11 @@ class Gremlin(LinkList):
     def __call__(self, *args):
         func_name = str(self.bottom)
 
-        if len(args) and issubclass(type(args[-1]), Predicate):
-            func = UnboudFunction(self, func_name, *args)
-        elif func_name in _PREDICATES.keys() and hasattr(MODULE, func_name):
+        if func_name in _PREDICATES.keys() and hasattr(MODULE, func_name):
             pred = getattr(MODULE, func_name)(*args, gremlin=self)
             func = pred.bottom
+        elif len(args) and issubclass(type(args[-1]), Predicate):
+            func = UnboudFunction(self, func_name, *args)
         else:
             func = Function(self, func_name, *args)
 

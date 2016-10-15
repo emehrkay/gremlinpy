@@ -1,3 +1,8 @@
+## 3.6.1
+
+Fixed:
+* Issue where a predicate object followed a predicate object and it didn't convert the Gremlin representation of second predicate correctly.
+
 ## 3.6.0
 
 Added:
