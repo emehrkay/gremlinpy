@@ -72,8 +72,6 @@ A function can also be added to the chain by calling the `func` method on the `G
     g.bound_params # {'GP_III_1': 12, 'GP_III_2': 'arg'}
 ```
 
-> Take a closer look at the second example as there are two things going on: the last parameter passed to the has function is automatically bound and if you want the value to be quoted in the resulting Gremlin string, you __MUST__ double quote it in Python. 
-
 __FunctionRaw__: Works as `Function` but does not prepend the dot before the function name.
 
 ```python
