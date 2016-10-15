@@ -155,11 +155,11 @@ Gremlinpy also aliases some of the predicates that are reserved words in Python:
 Predicates are used just like any other Gremlin instance:
 
 ```python
-    from gremlinpy import Gremlin, _
+    from gremlinpy import Gremlin
 
     g = Gremlin()
     g.V().has('name', neq('mark')) # g.V().has(GP_OOP_1, neq(GP_OOP_2))
-    g.bound_params # {'GP_OOP_': 'name', 'GP_OOP_2': 'mark'}
+    g.bound_params # {'GP_OOP_1': 'name', 'GP_OOP_2': 'mark'}
 ```
 
 Gremlinpy allows you to create a predicate on the fly using the `_` function:
@@ -168,7 +168,8 @@ Gremlinpy allows you to create a predicate on the fly using the `_` function:
     from gremlinpy import Gremlin, _
 
     g = Gremlin()
-    g.V().has(_('myPredicate', [1, 2])) # g.V().has(myPredicate())
+    g.V().has(_('myPredicate', [1, 2])) # g.V().has(myPredicate(GP_UIY_1, GP_IUY_2))
+    g.bound_params # {'GP_UIY_1': 1, 'GP_UIY_2': 2}
 ```
 
 
