@@ -63,6 +63,13 @@ __Function__: Functions are called when you add parenthesis after an attribute. 
     g.bound_params # {'GP_CXG_1': 'mark'}
 ```
 
+A function can also be added to the chain by calling the `func` method on the `Gremlin` instance. The first argument is the name of the function, the rest are bound arguments in the final resulting string.
+
+```python
+    g.V(12).func('myMagicFunction', 'arg') # g.V(GP_III_1).myMagicFunction(GP_III_2)
+    g.bound_params # {'GP_III_1': 12, 'GP_III_2': 'arg'}
+```
+
 > Take a closer look at the second example as there are two things going on: the last parameter passed to the has function is automatically bound and if you want the value to be quoted in the resulting Gremlin string, you __MUST__ double quote it in Python. 
 
 __FunctionRaw__: Works as `Function` but does not prepend the dot before the function name.
@@ -70,7 +77,7 @@ __FunctionRaw__: Works as `Function` but does not prepend the dot before the fun
 ```python
     g.set_graph_variable('')
     g.function('arg')func_raw('some_function', 'raw content')
-    // function(GP_IUNX_1)some_function(raw content)
+    # function(GP_IUNX_1)some_function(raw content)
 ```
 
 __UnboundFunction__: This allows you to call a function, but not have the instance automatically bind any of the params. It has a different syntax than just chaning a function in the previous exmaple:
@@ -84,7 +91,7 @@ __UnboundFunctionRaw__: This works like `UnboundFunction` except it does not pre
 ```python
     g.set_graph_variable('')
     g.func_raw_unbound('if', '1 == 2').close('1 is 2?').func_raw_unbound('elseif', '2 == 2').close('2 is 2')
-    // if(1 == 2){1 is 2?}elseif(2 == 2){2 is 2}
+    # if(1 == 2){1 is 2?}elseif(2 == 2){2 is 2}
 ```
 
 __Index__: Indexes are done in Groovy in a way that is not directly allowed in Python's syntax. However, Python's slices should convert over pretty easily:
@@ -110,11 +117,11 @@ __ClosureArguments__: Groovy allows for inline lambda functions in a syntax that
 __Raw__: Raw allows you to put anything in and have it passed out the same way. It doesnt put anything before or after the call. It is useful for when you're doing something that cannot easily map:
 
 ```python
-	g.set_graph_variable('')
-		.raw('if(').raw('1 == 2').raw(')')
-		.close("'never'")
-		.else.close("'always'")
-	# if(1 == 2){'never'}else{'always'}
+    g.set_graph_variable('')
+        .raw('if(').raw('1 == 2').raw(')')
+        .close("'never'")
+        .else.close("'always'")
+    # if(1 == 2){'never'}else{'always'}
 ```
 
 > note: this is just an example, there are better ways to do complex composition
@@ -147,7 +154,7 @@ If you need the resulting gremlin script to print out '\__init__' or one of the 
 
 ###Binding Params
 
-The last parameter passed in a function is automatically bound. Each `Gremlin` instance creates a unique key to hold the bound parameter values to. However, you can manually bind the param and pass a name that you deisre.
+All parameters passed into a function are automatically bound. Each `Gremlin` instance creates a unique key to hold the bound parameter values to. However, you can manually bind the param and pass a name that you deisre.
 
 ```python
     bound = g.bind_param('my_value', 'MY_PARAM')
@@ -163,6 +170,14 @@ gremlinpy will attempt to reuse binding names in the generated script. If you pr
 bound = g.bind_param('some value', 'SOME\_KEY')
 g.function(bound[0]).func2(bound[0]) # g.function(SOME\_KEY).func2(SOME_KEY)
 ~~~
+
+The easiest way to bind params is to use the `Param` object and pass it where needed:
+
+```python
+    g = Gremlin()
+    name_param = Param('name', 'mark')
+    g.V().has('name', name_param) ...
+```
 
 ###Nesting Instances
 
