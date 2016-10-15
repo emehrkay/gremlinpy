@@ -124,6 +124,35 @@ class GremlinTests(unittest.TestCase):
         self.assertEqual(string, expected)
         self.assertEqual(len(g.bound_params), 1)
 
+    def test_will_bind_all_params_in_function(self):
+        g = Gremlin().some_function('one', 'two', 'three')
+        string = str(g)
+        params = g.bound_params
+        one = get_dict_key(params, 'one')
+        two = get_dict_key(params, 'two')
+        three = get_dict_key(params, 'three')
+        expected = 'g.some_function({}, {}, {})'.format(one, two, three)
+
+        self.assertEqual(3, len(params))
+        self.assertEqual(expected, string)
+
+    def test_will_bind_all_params_in_function_with_mixed_manually_bound_args(self):
+        g = Gremlin()
+        b_one = Param('one', 'one')
+        b_two = g.bind_param('two', 'two')
+
+        g.some_function(b_one, b_two[0], 'three')
+
+        string = str(g)
+        params = g.bound_params
+        one = get_dict_key(params, 'one')
+        two = get_dict_key(params, 'two')
+        three = get_dict_key(params, 'three')
+        expected = 'g.some_function({}, {}, {})'.format(one, two, three)
+
+        self.assertEqual(3, len(params))
+        self.assertEqual(expected, string)
+
     def test_can_add_fuctions_binding_same_value_with_one_bound_param(self):
         val = 'random' + str(random())
         g = Gremlin()
@@ -501,41 +530,47 @@ class GremlinInjectionTests(unittest.TestCase):
         n = Gremlin()
         d = {'name': str(random()), 'age': str(random())}
 
-        n.set_graph_variable('__').has("'name'", d['name'])
+        n.set_graph_variable('__').has('name', d['name'])
         n.func('age', d['age'])
         g.function('name', d['name']).nest(n)
 
         string = str(g)
         params = g.bound_params
+        name_field = get_dict_key(params, 'name')
         name = get_dict_key(params, d['name'])
         age = get_dict_key(params, d['age'])
-        expected = ("g.function(name, {})"
-                    ".nest(__.has('name', {}).age({}))").format(name,
-                                                                name, age)
+        expected = ("g.function({}, {})"
+                    ".nest(__.has({}, {}).age({}))").format(name_field,
+                        name, name_field, name, age)
 
-        self.assertEqual(2, len(params))
+        self.assertEqual(3, len(params))
         self.assertEqual(expected, string)
 
     def test_can_double_nest_with_unbound_params_of_same_value(self):
         g = Gremlin()
         n = Gremlin()
         nn = Gremlin()
-        d = {'name': str(random()), 'age': str(random())}
+        d = {
+            'name_val': str(random()), 
+            'age_val': str(random()),
+        }
 
-        nn.set_graph_variable('_').func('name', d['name'])
-        n.set_graph_variable('__').has("'name'", d['name'])
-        n.func('age', d['age']).nest(nn)
-        g.function('name', d['name']).nest(n)
+        nn.set_graph_variable('_').func('name', d['name_val'])
+        n.set_graph_variable('__').has('name', d['name_val'])
+        n.func('age', d['age_val']).nest(nn)
+        g.function('name', d['name_val']).nest(n)
 
         string = str(g)
         params = g.bound_params
-        name = get_dict_key(params, d['name'])
-        age = get_dict_key(params, d['age'])
-        expected = ("g.function(name, {})"
-                    ".nest(__.has('name', {}).age({})"
-                    ".nest(_.name({})))").format(name, name, age, name)
+        name_field = get_dict_key(params, 'name')
+        name_val = get_dict_key(params, d['name_val'])
+        age_val = get_dict_key(params, d['age_val'])
+        expected = ("g.function({}, {})"
+                    ".nest(__.has({}, {}).age({})"
+                    ".nest(_.name({})))").format(name_field, name_val,
+                        name_field, name_val, age_val, name_val)
 
-        self.assertEqual(2, len(params))
+        self.assertEqual(3, len(params))
         self.assertEqual(expected, string)
 
 
@@ -627,7 +662,26 @@ class PredicateTests(unittest.TestCase):
         s = str(g)
 
         self.assertEqual(s, expected)
-        
+
+    def test_can_start_anon_traversal(self):
+        a = Anon().call()
+        g = Gremlin().subAnon(a)
+
+        string = str(g)
+        params = g.bound_params
+        expected = 'g.subAnon(__.call())'
+
+        self.assertEqual(0, len(params))
+        self.assertEqual(expected, string)
+
+    def test_can_handle_problematic_predicates_in_diff_contexes(self):
+        g = Gremlin().IN().AND(AS().IS().NOT())
+        string = str(g)
+        expected = 'g.in().AND(as().is().not())'
+        params = g.bound_params
+
+        self.assertEqual(0, len(params))
+        self.assertEqual(expected, string)
 
 
 if __name__ == '__main__':
