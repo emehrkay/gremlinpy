@@ -1,3 +1,5 @@
+> Note: 3.6.0 changes the way arguments are automatically bound in Function objects. The old way was to only bind the last argument in a function call, but with 3.6.0 all arguments will be bound. This may break some tests that check the contents of the generated scripts. Please update accordingly
+
 Gremlinpy
 =========
 
@@ -114,7 +116,7 @@ __ClosureArguments__: Groovy allows for inline lambda functions in a syntax that
     g.func.close('body', 'x', 'y') # g.func{x, y -> body }
 ```
 
-__Raw__: Raw allows you to put anything in and have it passed out the same way. It doesnt put anything before or after the call. It is useful for when you're doing something that cannot easily map:
+__Raw__: Raw allows you to put anything in and have it passed out the same way. It doesn't put anything before or after the call. It is useful for when you're doing something that cannot easily map:
 
 ```python
     g.set_graph_variable('')
@@ -129,7 +131,7 @@ __Raw__: Raw allows you to put anything in and have it passed out the same way. 
 
 ###Overloading
 
-The `Gremlin` instance has memebers that are basically reserved words and will not be passed to your resulting gremlin script. 
+The `Gremlin` instance has members that are basically reserved words and will not be passed to your resulting gremlin script. 
 
 These include:
 
@@ -154,7 +156,7 @@ If you need the resulting gremlin script to print out '\__init__' or one of the 
 
 ###Binding Params
 
-All parameters passed into a function are automatically bound. Each `Gremlin` instance creates a unique key to hold the bound parameter values to. However, you can manually bind the param and pass a name that you deisre.
+All parameters passed into a function are automatically bound. Each `Gremlin` instance creates a unique key to hold the bound parameter values to. However, you can manually bind the param and pass a name that you desire.
 
 ```python
     bound = g.bind_param('my_value', 'MY_PARAM')
@@ -163,7 +165,7 @@ All parameters passed into a function are automatically bound. Each `Gremlin` in
     g.bound_params # {'MY_PARAM': 'my_value'}
 ```
 
-gremlinpy will attempt to reuse binding names in the generated script. If you prevously bound 'mark is great' and bind it again, the script will utilitize the same parameters for each instance. This will save on the overally payload that is sent to the Gremlin server and it will save on what the Gremlin server has to cache.
+gremlinpy will attempt to reuse binding names in the generated script. If you previously bound 'mark is great' and bind it again, the script will utilize the same parameters for each instance. This will save on the overall payload that is sent to the Gremlin server and it will save on what the Gremlin server has to cache.
 
 ~~~python
 
@@ -197,16 +199,16 @@ Nesting allows you to have more control over query creation, it offers some sani
 
 ##Statements
 
-Gremlinpy allows you to compose very complex gremlin chains. A Gremlinpy Statement object allows you to encapuslate and package a part of that construction.
+Gremlinpy allows you to compose very complex gremlin chains. A Gremlinpy Statement object allows you to encapsulate and package a part of that construction.
 
 Gremlinpy works by tokenizing every action against the object instance into a simple linked list, a statement will allow you apply a preset token definiton to a `Gremlin` instance.
 
 ###Usage
 
-Statements can be used in a few ways, the simpliest is to apply it directy to a Gremlin instance. When used this way the statement will augment the Gremlin instance that is directly applied to.
+Statements can be used in a few ways, the simplest is to apply it directly to a Gremlin instance. When used this way the statement will augment the Gremlin instance that is directly applied to.
 
 ```python
-    class HasMark(Stateemnt):
+    class HasMark(Statement):
         """
         this statement simply appends .has('name', 'Mark') to a gremlin script
         """
@@ -267,7 +269,7 @@ A statement can be passed into a Gremlin instance Function, Raw, Closure call. T
 
 If your Gremlin server instance has query caching turned on, manually binding params will allow you to create statements on the server that will  pre-parse your query the second time you run it an return results quicker.
 
-If you are not manually binding params, everytime you call a script, even the same script, a differnt one is being sent to the server.
+If you are not manually binding params, every time you call a script, even the same script, a different one is being sent to the server.
 
 ```python
     g.v(12) # g.v(GP_XSX_1)
