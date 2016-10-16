@@ -3,7 +3,7 @@
 Gremlinpy
 =========
 
-Gremlinpy is a small library that allows you to write pure Python and output Gremlin script complete with bound parameters that can be run against a Tinkerpop 3 Gremlin server instance. It is meant to be a low-level way for your application to communicate its intent with the graph server.
+Gremlinpy is a small library that allows you to write pure Python and output GremlinGroovy script complete with bound parameters that can be run against a Tinkerpop 3 Gremlin server instance. It is meant to be a low-level way for your application to communicate its intent with the graph server. The best way to think of Gremlinpy is as a very flexible query builder that doesn't limit what can be expressed with Python for GremlinGroovy.
 
 ![gremlinpy logo by Marko A. Rodriguez ](gremlinpy-logo.png)
 
@@ -201,7 +201,7 @@ All parameters passed into a function are automatically bound. Each `Gremlin` in
     g.bound_params # {'MY_PARAM': 'my_value'}
 ```
 
-gremlinpy will attempt to reuse binding names in the generated script. If you previously bound 'mark is great' and bind it again, the script will utilize the same parameters for each instance. This will save on the overall payload that is sent to the Gremlin server and it will save on what the Gremlin server has to cache.
+Gremlinpy will attempt to reuse binding names in the generated script. If you previously bound 'mark is great' and bind it again, the script will utilize the same parameters for each instance. This will save on the overall payload that is sent to the Gremlin server and it will save on what the Gremlin server has to cache.
 
 ~~~python
 
