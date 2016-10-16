@@ -61,8 +61,8 @@ __Function__: Functions are called when you add parenthesis after an attribute. 
     g.V(12) #g.v(GP_UUID_1)
     g.bound_params # {'GP_UUID_1': 12}
     
-    g.v.has("'name'", 'T.eq', 'mark') #g.v.has('name', T.eq, GP_CXZ_1)
-    g.bound_params # {'GP_CXG_1': 'mark'}
+    g.v.has('name', 'mark') #g.v.has(GP_CXZ_1, GP_CXZ_2)
+    g.bound_params # {'GP_CXG_2': 'mark', 'GP_CXZ_1': 'name'}
 ```
 
 A function can also be added to the chain by calling the `func` method on the `Gremlin` instance. The first argument is the name of the function, the rest are bound arguments in the final resulting string.
@@ -92,14 +92,6 @@ __UnboundFunctionRaw__: This works like `UnboundFunction` except it does not pre
     g.set_graph_variable('')
     g.func_raw_unbound('if', '1 == 2').close('1 is 2?').func_raw_unbound('elseif', '2 == 2').close('2 is 2')
     # if(1 == 2){1 is 2?}elseif(2 == 2){2 is 2}
-```
-
-__Index__: Indexes are done in Groovy in a way that is not directly allowed in Python's syntax. However, Python's slices should convert over pretty easily:
-
-```python
-    g.function('arg')[1:50] # g.function(GP_XXX_1)[1..50]
-    
-    g.x[1] # g.x[1]
 ```
 
 __Closure__: Closures simply allow you to put things between curly braces. Since it is an error to add curly braces to the end of Python objects, this has its own method on the `Gremlin` instance:
@@ -235,10 +227,10 @@ Nesting allows you to have more control over query creation, it offers some sani
     g = Gremlin()
     i = Gremlin()
     
-    i.set_grap_variable('').it.setProperty('age', 33)
-    g.v(12).close(i) # g.v(GP_XXQ_1){it.setProperty('age', GP_UYI_1)}
+    i.set_graph_variable('').it.setProperty('age', 33)
+    g.v(12).close(i) # g.v(GP_XXQ_1){it.setProperty(GP_UYI_3, GP_UYI_1)}
     
-    g.bound_params # {'GP_XXQ_1': 12, 'GP_UYI': 33}
+    g.bound_params # {'GP_XXQ_1': 12, 'GP_UYI': 33, 'GP_UYI_3': 'age'}
 ```
 
 ##Statements
@@ -265,7 +257,7 @@ Statements can be used in a few ways, the simplest is to apply it directly to a 
     mark = HasMark()
     g.V.apply_statement(mark)
     
-    str(g) # g.V.has('name', GP_IOKH_1)
+    str(g) # g.V.has(GP_IOKH_1, GP_IOKH_2)
 ```
 
 Statements can also be chained:
@@ -284,7 +276,7 @@ Statements can also be chained:
 
     g.V.apply_statement(mark).apply_statement(sex)
     
-    str(g) # g.V.has('name', GP_IOKH_1).has('sex', GP_IOKH_2)
+    str(g) # g.V.has(GP_IOKH_1, GP_IOKH_2).has(GP_IOKH_3, GP_IOKH_4)
 ```
 
 A statement can be passed into a Gremlin instance Function, Raw, Closure call. These statements will not modify the Gremlin instance that they are passed into. If you want the statement to have a specialized Gremlin instance, you must pass it into the statement. Otherwise a blank Gremlin instance is created and passed into the Statement.
