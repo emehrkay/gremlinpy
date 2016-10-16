@@ -45,9 +45,9 @@ Once that is converted to a string, your gremlin instance will hold the bound pa
 
 It's that simple, but Gremlinpy allows you to write very complex Gremlin syntax in pure Python. And if you're having trouble expressing the Gremlin/Groovy in the Python model, it allows for straight string manipulation complete with parameter binding.
 
-Though the usage of Python's magic methods, we can compose a Gremlin string by recording every attribute, item, or call against the instance and creating a token for it. There are ten token types that allow you to express Gremlin with Python: 
+Though the usage of Python's magic methods, we can compose a Gremlin string by recording every attribute, item, or call against the instance and creating a token for it. There are multiple token types that allow you to express Gremlin with Python: 
 
-__GraphVariable__: This is the root token in the list. It is always present and will be used in every Gremlin string produced. It can be nullified by calling `Gremlin.set_graph_variable('')`. That is useful for when you are running scripts that may not interact with the graph or when your graph variable is something other than the letter "g".
+__GraphVariable__: This is the root token in the list. It is always present and will be used in every Gremlin string produced. It can be nullified by calling `Gremlin.set_graph_variable('')` or during instantiation `g = Gremlin('')`. That is useful for when you are running scripts that may not interact with the graph or when your graph variable is something other than the letter "g".
 
 __Attribute__: Attributes are things on the Gremlin chain that are not functions, arent closures, and are not indexes. They stand alone and are defined when you call any sequence without parenthesis on your Gremlinpy instance. 
 
@@ -55,7 +55,7 @@ __Attribute__: Attributes are things on the Gremlin chain that are not functions
     g.a.b #g.a.b -- a and b are the attribues
 ```
 
-__Function__: Functions are called when you add parenthesis after an attribute. The function object will assume that the last argument passed to the function is the one that will be bound.
+__Function__: Functions are called when you add parenthesis after an attribute. The function object will bind every argument passed into it.
 
 ```python
     g.V(12) #g.v(GP_UUID_1)
@@ -65,7 +65,7 @@ __Function__: Functions are called when you add parenthesis after an attribute. 
     g.bound_params # {'GP_CXG_2': 'mark', 'GP_CXZ_1': 'name'}
 ```
 
-A function can also be added to the chain by calling the `func` method on the `Gremlin` instance. The first argument is the name of the function, the rest are bound arguments in the final resulting string.
+A function can also be added to the chain by calling the `func` method on the `Gremlin` instance. The first argument is the name of the function, the rest are bound arguments in the final resulting string. This is useful for function names that are reserved words in Python.
 
 ```python
     g.V(12).func('myMagicFunction', 'arg') # g.V(GP_III_1).myMagicFunction(GP_III_2)
@@ -251,13 +251,14 @@ Statements can be used in a few ways, the simplest is to apply it directly to a 
         def build(self):
             g = self.gremlin()
             
-            g.has("'name'", 'Mark')
+            g.has('name', 'Mark')
     
     g = Gremlin()
     mark = HasMark()
     g.V.apply_statement(mark)
     
     str(g) # g.V.has(GP_IOKH_1, GP_IOKH_2)
+    g.bound_params # {'CP_IOKH_1': 'name', 'GP_IOKH_2': 'Mark'}
 ```
 
 Statements can also be chained:
@@ -266,10 +267,10 @@ Statements can also be chained:
     class HasSex(Statement):
         def __init__(self, sex):
             self.sex = sex
-            
+
         def build(self):
-            self.gremlin.has("'sex'", self.sex)
-            
+            self.gremlin.has('sex', self.sex)
+
     g = Gremlin()
     mark = HasMark()
     sex = HasSex('male')
@@ -277,6 +278,7 @@ Statements can also be chained:
     g.V.apply_statement(mark).apply_statement(sex)
     
     str(g) # g.V.has(GP_IOKH_1, GP_IOKH_2).has(GP_IOKH_3, GP_IOKH_4)
+    g.bound_params # {'CP_IOKH_1': 'name', 'GP_IOKH_2': 'Mark', 'GP_IOKH_3': 'sex', 'GP_IOKH_4':  'male'}
 ```
 
 A statement can be passed into a Gremlin instance Function, Raw, Closure call. These statements will not modify the Gremlin instance that they are passed into. If you want the statement to have a specialized Gremlin instance, you must pass it into the statement. Otherwise a blank Gremlin instance is created and passed into the Statement.
@@ -298,6 +300,7 @@ A statement can be passed into a Gremlin instance Function, Raw, Closure call. T
     g.set_graph_variable('').add_token(if_con).close(v)
     
     str(g) # if(1 == 1){g.v(GP_DDIO_1)}
+    g.bound_params # {'GP_DDIO_1': 44}
 ```
 
 ##Performance Tweaks
