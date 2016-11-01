@@ -599,6 +599,20 @@ class IN(Predicate):
     def _function(self, *args):
         return 'in'
 
+class TO(Predicate):
+    """Allows for easy use of 'to' in steps"""
+
+    @property
+    def _function(self, *args):
+        return 'to'
+
+class FROM(Predicate):
+    """Allows for easy use of 'from' in steps"""
+
+    @property
+    def _function(self, *args):
+        return 'from'
+
 
 def _(method, *args):
     """method used to create predicates dynamically"""
