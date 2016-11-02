@@ -591,6 +591,13 @@ class AND(Predicate):
     def _function(self, *args):
         return 'and'
 
+class OR(Predicate):
+    """Allows for easy use of 'or' in steps"""
+
+    @property
+    def _function(self, *args):
+        return 'or'
+
 
 class IN(Predicate):
     """Allows for easy use of 'in' in steps"""
