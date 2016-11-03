@@ -143,6 +143,9 @@ Gremlinpy also aliases some of the predicates that are reserved words in Python:
 * IS -- is
 * AS -- as
 * IN -- in
+* FROM -- from
+* TO -- to
+* OR -- or
 
 Predicates are used just like any other Gremlin instance:
 

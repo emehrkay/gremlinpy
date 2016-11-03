@@ -1,3 +1,8 @@
+## 3.7.0
+
+Added:
+* Predicates for 'from', 'to', and 'or' -- https://github.com/emehrkay/gremlinpy/pull/5
+
 ## 3.6.1
 
 Fixed:
