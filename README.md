@@ -306,6 +306,25 @@ A statement can be passed into a Gremlin instance Function, Raw, Closure call. T
     g.bound_params # {'GP_DDIO_1': 44}
 ```
 
+###Copying
+
+Gremlinpy has a built-in way to copy instances. This is useful for when you want to branch at a current point along the path, but keep the preceding definitions in tact.
+
+```python
+page = get_page()
+per_page = get_per_page()
+
+g = Gremlin().hasLabel('user').hasId(15).out('blog_post') # get all of the blog posts for user 15
+
+# we will branch here to get the total number of posts for the user
+total = g.copy().size()
+
+# we continue here to paginate
+g.range(page, page * per_page)
+
+# run queries
+```
+
 ##Performance Tweaks
 ###Always Manually Bind Params
 
