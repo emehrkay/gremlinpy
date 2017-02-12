@@ -1,5 +1,7 @@
 from random import randrange, random
+
 import unittest
+import re
 
 from gremlinpy.gremlin import *
 from gremlinpy.gremlin import _
@@ -11,6 +13,21 @@ def get_dict_key(dict, value):
             return k
 
     return None
+
+
+def gremlin_as_string(gremlin):
+    script = str(gremlin)
+    params = gremlin.bound_params
+    pattern = re.compile(r'\b(' + '|'.join(params.keys()) + r')\b')
+
+    def su(x):
+        if not params:
+            return ''
+
+        x = str(params[x.group()]) if params[x.group()] else ''
+        return "'%s'" % x
+
+    return pattern.sub(su, script)
 
 
 class GremlinTests(unittest.TestCase):
@@ -474,6 +491,35 @@ class GremlinTests(unittest.TestCase):
         self.assertEqual(s, expected)
         self.assertEqual(len(params), 1)
 
+    def test_can_copy_gremlin_instance(self):
+        g = Gremlin('xxxx').out().someThing('value')
+        gg = g.copy()
+
+        str(g)
+        str(gg)
+
+        string_g = gremlin_as_string(g)
+        string_gg = gremlin_as_string(gg)
+        params_g = g.bound_params
+        params_gg = gg.bound_params
+
+        self.assertEqual(string_g, string_gg)
+        self.assertEqual(len(params_g), len(params_gg))
+
+    def test_can_copy_gremlin_instance_but_modify_one_independently(self):
+        g = Gremlin('xxxx').out().someThing('value')
+        gg = g.copy()
+
+        g.some().other.Mehtod().Chain('with', 'arguments')
+
+        string_g = str(g)
+        string_gg = str(gg)
+        params_g = g.bound_params
+        params_gg = gg.bound_params
+
+        self.assertNotEqual(string_g, string_gg)
+        self.assertNotEqual(len(params_g), len(params_gg))
+
 
 class GremlinInjectionTests(unittest.TestCase):
 
@@ -490,6 +536,25 @@ class GremlinInjectionTests(unittest.TestCase):
         self.assertEqual(expected, string)
         self.assertEqual(len(params), 0)
 
+    def test_can_copy_nested_gremlin(self):
+        g = Gremlin()
+        n = Gremlin()
+
+        g.nest(n.nested())
+
+        gg = g.copy()
+
+        str(g)
+        str(gg)
+
+        str_g = gremlin_as_string(g)
+        str_gg = gremlin_as_string(gg)
+        params_g = g.bound_params
+        params_gg = gg.bound_params
+
+        self.assertEqual(str_g, str_gg)
+        self.assertEqual(len(params_g), len(params_gg))
+
     def test_can_nest_double_nest_gremlin(self):
         g = Gremlin()
         n = Gremlin()
@@ -503,6 +568,26 @@ class GremlinInjectionTests(unittest.TestCase):
 
         self.assertEqual(expected, string)
         self.assertEqual(len(params), 0)
+
+    def test_can_copy_double_nested_gremlin(self):
+        g = Gremlin()
+        n = Gremlin()
+        d = Gremlin()
+
+        g.nest(n.nested(d.deep()))
+
+        gg = g.copy()
+
+        str(g)
+        str(gg)
+
+        str_g = gremlin_as_string(g)
+        str_gg = gremlin_as_string(gg)
+        params_g = g.bound_params
+        params_gg = gg.bound_params
+
+        self.assertEqual(str_g, str_gg)
+        self.assertEqual(len(params_g), len(params_gg))
 
     def test_can_nest_with_bound_params(self):
         g = Gremlin()
@@ -682,6 +767,21 @@ class PredicateTests(unittest.TestCase):
 
         self.assertEqual(0, len(params))
         self.assertEqual(expected, string)
+
+    def test_can_handle_problematic_predicates_in_diff_contexes_and_copy_it(self):
+        g = Gremlin().IN().AND(AS().IS().NOT('some', 'param'))
+        gg = g.copy()
+
+        str(g)
+        str(gg)
+
+        g_string = gremlin_as_string(g)
+        gg_string = gremlin_as_string(gg)
+        params_g = g.bound_params
+        params_gg = gg.bound_params
+
+        self.assertEqual(len(params_g), len(params_gg))
+        self.assertEqual(g_string, gg_string)
 
 
 if __name__ == '__main__':

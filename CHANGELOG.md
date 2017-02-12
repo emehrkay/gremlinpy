@@ -1,3 +1,8 @@
+## 3.8.0
+
+Added:
+* A `copy` method on `gremlinpy.Gremlin`, `gremlinpy.Token`, and `gremlinpy.Predicate` instances that copies over the current query into a new object chain.
+
 ## 3.7.0
 
 Added:

@@ -54,7 +54,7 @@ class LinkList(object):
 
         """
         prepare the gremlin string
-            use the token's concat value only if the preceeding token is
+            use the token's concat value only if the preceding token is
             not Raw or an empty string (this happens when the graph variable
             is set to ''
         """
@@ -120,6 +120,19 @@ class Gremlin(LinkList):
         self._gremlins = []
 
         return self.set_graph_variable(self.gv)
+
+    def copy(self, gremlin=None):
+        if not gremlin:
+            gremlin = Gremlin(self.gv)
+            gremlin.bound_params = copy.deepcopy(self.bound_params)
+
+        if self.top:
+            gremlin.top = self.top.copy(gremlin)
+
+        if self.return_var:
+            gremlin.return_var = self.return_var
+
+        return gremlin
 
     @property
     def stack_bound_params(self):
@@ -240,6 +253,12 @@ class Gremlin(LinkList):
         return (name, value)
 
     def range(self, start, end):
+        if isinstance(start, (int, float, complex)):
+            start = str(start)
+
+        if isinstance(end, (int, float, complex)):
+            end = str(end)
+
         return self.func_raw_unbound('range', *(start, end))
 
     def unbound(self, function, *args):
@@ -363,6 +382,25 @@ class Token(Link, _Tokenable):
         self.gremlin = gremlin
         self.value = self.fix_value(value)
         self.args = list(args)
+
+    def copy(self, gremlin):
+        value = copy.deepcopy(self.value)
+        args = []
+
+        for arg in self.args:
+            if isinstance(arg, Gremlin):
+                args.append(arg.copy())
+            else:
+                args.append(copy.deepcopy(arg))
+
+        token = getattr(MODULE, self.__class__.__name__)(gremlin, value, *args)
+
+        if self.next:
+            nxt = self.next.copy(gremlin)
+            token.next = nxt
+            gremlin.bottom = nxt
+
+        return token
 
 
 class GraphVariable(Token):
