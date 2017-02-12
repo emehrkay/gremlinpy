@@ -394,11 +394,11 @@ class Token(Link, _Tokenable):
                 args.append(copy.deepcopy(arg))
 
         token = getattr(MODULE, self.__class__.__name__)(gremlin, value, *args)
+        gremlin.bottom = token
 
         if self.next:
             nxt = self.next.copy(gremlin)
             token.next = nxt
-            gremlin.bottom = nxt
 
         return token
 

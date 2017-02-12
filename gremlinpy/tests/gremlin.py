@@ -520,6 +520,23 @@ class GremlinTests(unittest.TestCase):
         self.assertNotEqual(string_g, string_gg)
         self.assertNotEqual(len(params_g), len(params_gg))
 
+    def test_can_copy_gremlin_instance_but_modify_copy_independently(self):
+        g = Gremlin('xxxx').out().someThing('value')
+        gg = g.copy()
+
+        gg.some().other.Method().Chain('with', 'arguments')
+
+        string_g = str(g)
+        string_gg = str(gg)
+        expected = "xxxx.out().someThing('value').some().other.Method().Chain('with', 'arguments')"
+        gg_string = gremlin_as_string(gg)
+        params_g = g.bound_params
+        params_gg = gg.bound_params
+
+        self.assertNotEqual(string_g, string_gg)
+        self.assertEqual(expected, gg_string)
+        self.assertNotEqual(len(params_g), len(params_gg))
+
 
 class GremlinInjectionTests(unittest.TestCase):
 

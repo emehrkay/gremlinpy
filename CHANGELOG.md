@@ -1,3 +1,8 @@
+## 3.8.0.1
+
+Hotfix:
+* Fixed an error where copied `gremlinpy.Gremlin` instances did not allow chaining from their last object
+
 ## 3.8.0
 
 Added:
