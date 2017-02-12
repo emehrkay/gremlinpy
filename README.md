@@ -236,6 +236,25 @@ Nesting allows you to have more control over query creation, it offers some sani
     g.bound_params # {'GP_XXQ_1': 12, 'GP_UYI': 33, 'GP_UYI_3': 'age'}
 ```
 
+###Copying
+
+Gremlinpy has a built-in way to copy instances. This is useful for when you want to branch at a current point along the path, but keep the preceding definitions in tact.
+
+```python
+page = get_page()
+per_page = get_per_page()
+
+g = Gremlin().hasLabel('user').hasId(15).out('blog_post') # get all of the blog posts for user 15
+
+# we will branch here to get the total number of posts for the user
+total = g.copy().size()
+
+# we continue here to paginate
+g.range(page, page * per_page)
+
+# run queries
+```
+
 ##Statements
 
 Gremlinpy allows you to compose very complex gremlin chains. A Gremlinpy Statement object allows you to encapsulate and package a part of that construction.
@@ -304,25 +323,6 @@ A statement can be passed into a Gremlin instance Function, Raw, Closure call. T
     
     str(g) # if(1 == 1){g.v(GP_DDIO_1)}
     g.bound_params # {'GP_DDIO_1': 44}
-```
-
-###Copying
-
-Gremlinpy has a built-in way to copy instances. This is useful for when you want to branch at a current point along the path, but keep the preceding definitions in tact.
-
-```python
-page = get_page()
-per_page = get_per_page()
-
-g = Gremlin().hasLabel('user').hasId(15).out('blog_post') # get all of the blog posts for user 15
-
-# we will branch here to get the total number of posts for the user
-total = g.copy().size()
-
-# we continue here to paginate
-g.range(page, page * per_page)
-
-# run queries
 ```
 
 ##Performance Tweaks
