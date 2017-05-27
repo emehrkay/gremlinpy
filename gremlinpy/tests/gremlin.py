@@ -170,6 +170,24 @@ class GremlinTests(unittest.TestCase):
         self.assertEqual(3, len(params))
         self.assertEqual(expected, string)
 
+    def test_will_bind_all_params_in_function_with_all_manually_bound_args(self):
+        g = Gremlin()
+        b_one = Param('one', 'one')
+        b_two = g.bind_param('two', 'two')
+        b_three = Param('three', 'three')
+
+        g.some_function(b_one, b_two[0], b_three)
+
+        string = str(g)
+        params = g.bound_params
+        one = get_dict_key(params, 'one')
+        two = get_dict_key(params, 'two')
+        three = get_dict_key(params, 'three')
+        expected = 'g.some_function({}, {}, {})'.format(one, two, three)
+
+        self.assertEqual(3, len(params))
+        self.assertEqual(expected, string)
+
     def test_can_add_fuctions_binding_same_value_with_one_bound_param(self):
         val = 'random' + str(random())
         g = Gremlin()

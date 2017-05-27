@@ -84,9 +84,9 @@ class Link(object):
 
 class Param(object):
 
-    def __init__(self, name, value):
+    def __init__(self, name, value=None):
         self.name = name
-        self.value = value
+        self.value = value if value is not None else name
 
 
 class Gremlin(LinkList):
@@ -259,7 +259,7 @@ class Gremlin(LinkList):
         if isinstance(end, (int, float, complex)):
             end = str(end)
 
-        return self.func_raw_unbound('range', *(start, end))
+        return self.func('range', *(start, end))
 
     def unbound(self, function, *args):
         unbound = UnboudFunction(self, function, *args)
