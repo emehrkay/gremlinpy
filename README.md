@@ -17,7 +17,7 @@ or
 
 or
 
-    easy_install gemlinpy
+    easy_install gremlinpy
 
 ##Overview
 
