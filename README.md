@@ -7,7 +7,7 @@ Gremlinpy is a small library that allows you to write pure Python and output Gre
 
 ![gremlinpy logo by Marko A. Rodriguez ](gremlinpy-logo.png)
 
-##Setup
+## Setup
 
     python setup.py install
 
@@ -19,7 +19,7 @@ or
 
     easy_install gemlinpy
 
-##Overview
+## Overview
 
 Python's syntax nearly mirrors Groovy's one-to-one so Grelinpy allows for an easy to manipulate Python object that will produce a Gremlin string as a result.
 
@@ -119,7 +119,7 @@ __Raw__: Raw allows you to put anything in and have it passed out the same way. 
 > note: this is just an example, there are better ways to do complex composition
 
 
-###Predicates
+### Predicates
 
 GremlinGroovy has an idea called [predicates](http://tinkerpop.apache.org/docs/3.0.0-incubating/#a-note-on-predicates). A predicate can simply be seen as a traversal that starts with a function and not a graph variable.
 
@@ -168,7 +168,7 @@ Gremlinpy allows you to create a predicate on the fly using the `_` function:
 ```
 
 
-###Overloading
+### Overloading
 
 The `Gremlin` instance has members that are basically reserved words and will not be passed to your resulting gremlin script. 
 
@@ -193,7 +193,7 @@ If you need the resulting gremlin script to print out '\__init__' or one of the 
     g.add_token(add_token) # g.add_token(5, 6)
 ```
 
-###Binding Params
+### Binding Params
 
 All parameters passed into a function are automatically bound. Each `Gremlin` instance creates a unique key to hold the bound parameter values to. However, you can manually bind the param and pass a name that you desire.
 
@@ -220,7 +220,7 @@ The easiest way to bind params is to use the `Param` object and pass it where ne
     g.V().has('name', name_param) ...
 ```
 
-###Nesting Instances
+### Nesting Instances
 
 Gremlinpy gets interesting when you want to compose a very complex string. It will allow you to nest `Gremlin` instances passing any bound params up to the root instance. 
 
@@ -236,7 +236,7 @@ Nesting allows you to have more control over query creation, it offers some sani
     g.bound_params # {'GP_XXQ_1': 12, 'GP_UYI': 33, 'GP_UYI_3': 'age'}
 ```
 
-###Copying
+### Copying
 
 Gremlinpy has a built-in way to copy instances. This is useful for when you want to branch at a current point along the path, but keep the preceding definitions in tact.
 
@@ -255,13 +255,13 @@ g.range(page, page * per_page)
 # run queries
 ```
 
-##Statements
+## Statements
 
 Gremlinpy allows you to compose very complex gremlin chains. A Gremlinpy Statement object allows you to encapsulate and package a part of that construction.
 
 Gremlinpy works by tokenizing every action against the object instance into a simple linked list, a statement will allow you apply a preset token definiton to a `Gremlin` instance.
 
-###Usage
+### Usage
 
 Statements can be used in a few ways, the simplest is to apply it directly to a Gremlin instance. When used this way the statement will augment the Gremlin instance that is directly applied to.
 
@@ -325,8 +325,8 @@ A statement can be passed into a Gremlin instance Function, Raw, Closure call. T
     g.bound_params # {'GP_DDIO_1': 44}
 ```
 
-##Performance Tweaks
-###Always Manually Bind Params
+## Performance Tweaks
+### Always Manually Bind Params
 
 If your Gremlin server instance has query caching turned on, manually binding params will allow you to create statements on the server that will  pre-parse your query the second time you run it an return results quicker.
 

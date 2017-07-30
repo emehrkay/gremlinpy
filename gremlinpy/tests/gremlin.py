@@ -524,6 +524,54 @@ class GremlinTests(unittest.TestCase):
         self.assertEqual(string_g, string_gg)
         self.assertEqual(len(params_g), len(params_gg))
 
+    def test_can_copy_gremlin_instance_and_reset_one_independently(self):
+        g = Gremlin('xxxx').out().someThing('value')
+        gg = g.copy()
+        g.reset()
+        str(g)
+        str(gg)
+
+        string_g = gremlin_as_string(g)
+        string_gg = gremlin_as_string(gg)
+        params_g = g.bound_params
+        params_gg = gg.bound_params
+
+        self.assertNotEqual(string_g, string_gg)
+        self.assertNotEqual(len(params_g), len(params_gg))
+
+    def test_can_copy_gremlin_instance_with_predicates(self):
+        arg = str(random())
+        g = Gremlin('xxxx').has(lt(arg)).someThing('value')
+        gg = g.copy()
+
+        str(g)
+        str(gg)
+
+        string_g = gremlin_as_string(g)
+        string_gg = gremlin_as_string(gg)
+        params_g = g.bound_params
+        params_gg = gg.bound_params
+
+        self.assertEqual(string_g, string_gg)
+        self.assertEqual(len(params_g), len(params_gg))
+
+    def test_can_copy_gremlin_instance_with_predicates_and_reset_one_independently(self):
+        arg = str(random())
+        g = Gremlin('xxxx').has(lt(arg)).someThing('value')
+        gg = g.copy()
+
+        g.reset()
+        str(g)
+        str(gg)
+
+        string_g = gremlin_as_string(g)
+        string_gg = gremlin_as_string(gg)
+        params_g = g.bound_params
+        params_gg = gg.bound_params
+
+        self.assertNotEqual(string_g, string_gg)
+        self.assertNotEqual(len(params_g), len(params_gg))
+
     def test_can_copy_gremlin_instance_but_modify_one_independently(self):
         g = Gremlin('xxxx').out().someThing('value')
         gg = g.copy()
@@ -532,6 +580,24 @@ class GremlinTests(unittest.TestCase):
 
         string_g = str(g)
         string_gg = str(gg)
+        params_g = g.bound_params
+        params_gg = gg.bound_params
+
+        self.assertNotEqual(string_g, string_gg)
+        self.assertNotEqual(len(params_g), len(params_gg))
+
+    def test_can_copy_gremlin_instance_with_predicates_but_modify_one_independently(self):
+        arg = str(random())
+        g = Gremlin('xxxx').has(lt(arg)).someThing('value')
+        gg = g.copy()
+
+        g.some().other.Mehtod().Chain('with', 'arguments')
+
+        str(g)
+        str(gg)
+
+        string_g = gremlin_as_string(g)
+        string_gg = gremlin_as_string(gg)
         params_g = g.bound_params
         params_gg = gg.bound_params
 
